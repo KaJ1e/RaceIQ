@@ -63,6 +63,16 @@ describe("settings with unit system", () => {
     expect(PartialSettingsSchema.safeParse({hudHostname: "http://pc.ts.net"}).success).toBe(false);
   });
 
+  test("stores a community tunes mirror and strips a trailing slash", () => {
+    const before = loadSettings();
+    saveSettings({ ...before, communityTunesUrl: " https://mirror.example.com/tunes/ " });
+    expect(loadSettings().communityTunesUrl).toBe("https://mirror.example.com/tunes");
+    saveSettings({ ...loadSettings(), communityTunesUrl: "" });
+    expect(loadSettings().communityTunesUrl).toBe("");
+    expect(PartialSettingsSchema.safeParse({ communityTunesUrl: "ftp://mirror.example.com" }).success).toBe(false);
+    expect(PartialSettingsSchema.safeParse({ communityTunesUrl: "not a url" }).success).toBe(false);
+  });
+
   test("loadSettings returns defaults when file has only udpPort (migration)", () => {
     if (!existsSync(SETTINGS_DIR)) mkdirSync(SETTINGS_DIR, { recursive: true });
     writeFileSync(SETTINGS_PATH, JSON.stringify({ udpPort: 5300 }));

@@ -18,6 +18,15 @@ const AppSettingsSchema = z.object({
   onboardingComplete: z.boolean().default(false),
   driverName: z.string().default(""),
   hudHostname: z.string().trim().toLowerCase().refine(value => normalizeHudHostname(value) !== null).default(""),
+  // Optional mirror for the community tunes / lap-time CDN. Empty keeps the
+  // built-in host; a value must be an absolute http(s) origin+path without a
+  // trailing slash so requests stay predictable.
+  communityTunesUrl: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || /^https?:\/\/[^\s]+$/.test(value), "communityTunesUrl must be empty or an http(s) URL")
+    .transform((value) => value.replace(/\/+$/, ""))
+    .default(""),
   udpPort: z.number().int().min(1024).max(65535).default(5301),
   unit: z.enum(["metric", "imperial"]).default("metric"),
   temperatureUnit: z.enum(["C", "F"]).default("C"),

@@ -31,7 +31,19 @@ The local cache does not expire. Network, manifest, payload, or validation failu
 
 ## Configuration
 
-`COMMUNITY_TUNES_URL` overrides the CDN base URL. The endpoint must expose the contract above and should use immutable content deployment with a content-derived manifest version.
+The base URL resolves in this order: `COMMUNITY_TUNES_URL` from the environment, then
+`communityTunesUrl` in `settings.json`, then the public host. Both overrides must expose the
+contract above and should use immutable content deployment with a content-derived manifest
+version. A trailing slash is stripped, and a value that is not an absolute `http(s)` URL is
+rejected when settings are saved.
+
+## Offline and restricted networks
+
+Every request is bounded by a 10 second timeout and a failure never replaces the cached
+catalogue, so a blocked or stalled CDN costs one failed sync instead of hanging startup or
+breaking the picker. To run fully local, point the base URL at any static host serving the
+same files (a directory server is enough) and leave it configured; the cache then survives
+network outages without further configuration.
 
 ## Ownership
 

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { loadSettings } from "../runtime/config/settings";
 import {
   getCommunityTunesSyncState,
   setCommunityTunesSyncState,
@@ -27,7 +28,16 @@ const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const SYNCED_GAME_IDS = ["fm-2023"] as const;
 
 function getCommunityTunesBaseUrl(): string {
-  return process.env.COMMUNITY_TUNES_URL ?? DEFAULT_BASE_URL;
+  // Explicit environment override wins (mirrors, tests), then the value stored in
+  // settings, then the public host.
+  if (process.env.COMMUNITY_TUNES_URL) return process.env.COMMUNITY_TUNES_URL;
+  try {
+    const configured = loadSettings().communityTunesUrl;
+    if (configured) return configured;
+  } catch {
+    // Unreadable settings must not break sync; fall through to the default.
+  }
+  return DEFAULT_BASE_URL;
 }
 
 const ManifestSchema = z.object({

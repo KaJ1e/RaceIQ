@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { GameId } from "@raceiq/shared/games/ids";
+import { loadSettings } from "../runtime/config/settings";
 
 /**
  * Community leaderboard CDN sync.
@@ -34,7 +35,14 @@ const MANIFEST_ENTRIES = Object.entries(MANIFEST_KEY_BY_GAME) as Array<
 >;
 
 function baseUrl(): string {
-  return process.env.COMMUNITY_TUNES_URL ?? DEFAULT_BASE_URL;
+  if (process.env.COMMUNITY_TUNES_URL) return process.env.COMMUNITY_TUNES_URL;
+  try {
+    const configured = loadSettings().communityTunesUrl;
+    if (configured) return configured;
+  } catch {
+    // Unreadable settings must not break sync; fall through to the default.
+  }
+  return DEFAULT_BASE_URL;
 }
 
 const ManifestSchema = z.object({
@@ -81,7 +89,10 @@ function skippedResult(version: string | null): LaptimeSyncResult {
 }
 
 async function fetchManifest(): Promise<LaptimeManifest | null> {
-  const manifestRes = await fetch(resolveManifestUrl(baseUrl()));
+  const manifestRes = await fetch(resolveManifestUrl(baseUrl()), {
+    // A blocked or stalled mirror must not leave the sync pending forever.
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!manifestRes.ok) {
     console.warn(`[Laptimes] manifest fetch failed: HTTP ${manifestRes.status}`);
     return null;
@@ -94,7 +105,7 @@ async function fetchGamePayload(
   path: string,
 ): Promise<{ value: unknown } | null> {
   const laptimesUrl = resolveLaptimeUrl(baseUrl(), path);
-  const res = await fetch(laptimesUrl);
+  const res = await fetch(laptimesUrl, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
     console.warn(`[Laptimes] ${manifestKey} fetch failed: HTTP ${res.status}; keeping cache`);
     return null;
