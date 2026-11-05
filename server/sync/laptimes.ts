@@ -2,6 +2,9 @@ import { z } from "zod";
 import type { GameId } from "@raceiq/shared/games/ids";
 import { loadSettings } from "../runtime/config/settings";
 import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
+import accSeed from "./seed/acc.json";
+import acEvoSeed from "./seed/ac-evo.json";
+import forzaSeed from "./seed/forza.json";
 
 /**
  * Community leaderboard CDN sync.
@@ -34,6 +37,18 @@ const MANIFEST_KEY_BY_GAME: Partial<Record<GameId, string>> = {
 const MANIFEST_ENTRIES = Object.entries(MANIFEST_KEY_BY_GAME) as Array<
   [GameId, string]
 >;
+
+/**
+ * Reference leaderboards shipped with the app. They are only loaded when the
+ * first sync fails and the cache is empty, so a blocked network still shows the
+ * community lap-time lists instead of nothing. A successful sync replaces them.
+ */
+const SEED_BY_GAME: Partial<Record<GameId, unknown>> = {
+  acc: accSeed,
+  "ac-evo": acEvoSeed,
+  "fm-2023": forzaSeed,
+};
+const SEED_VERSION = "seed:2026-11-05";
 
 function baseUrl(): string {
   if (process.env.COMMUNITY_TUNES_URL) return process.env.COMMUNITY_TUNES_URL;
@@ -138,6 +153,24 @@ function parseLaptimeRows(manifestKey: string, raw: unknown): LaptimeEntry[] | n
 }
 
 /**
+ * Load the bundled reference leaderboards. First run only: once a real sync has
+ * populated the cache, the snapshot is never reloaded for this process.
+ */
+function applySeedLaptimes(): LaptimeSyncResult {
+  let total = 0;
+  for (const [gameId, raw] of Object.entries(SEED_BY_GAME) as Array<[GameId, unknown]>) {
+    const rows = parseLaptimeRows(MANIFEST_KEY_BY_GAME[gameId] ?? gameId, raw);
+    if (!rows || rows.length === 0) continue;
+    cache.set(gameId, rows);
+    total += rows.length;
+  }
+  if (total === 0) return skippedResult(cachedVersion);
+  cachedVersion = SEED_VERSION;
+  console.log(`[Laptimes] offline: loaded bundled snapshot (${total} entries, ${SEED_VERSION})`);
+  return { synced: false, count: total, version: SEED_VERSION };
+}
+
+/**
  * Run one sync pass across every game the CDN publishes leaderboards for.
  * Skips re-fetching when the manifest version is unchanged, unless `force`
  * is set. Per-game failures are isolated: a bad payload for one game keeps
@@ -153,6 +186,7 @@ export async function syncLaptimes(
   try {
     const manifest = await fetchManifest();
     if (!manifest) {
+      if (cache.size === 0) return applySeedLaptimes();
       return skippedResult(cachedVersion);
     }
 
@@ -191,6 +225,7 @@ export async function syncLaptimes(
     return { synced: true, count: total, version: manifest.version };
   } catch (err) {
     recordOnlineFailure("laptimes", err instanceof Error ? err.message : String(err));
+    if (cache.size === 0) return applySeedLaptimes();
     console.warn("[Laptimes] sync failed; keeping existing cache:", err instanceof Error ? err.message : err);
     return skippedResult(cachedVersion);
   } finally {
