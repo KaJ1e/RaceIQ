@@ -80,6 +80,8 @@ function syncSkippedResult(storedVersion: string | null): SyncResult {
 async function fetchManifest(): Promise<Manifest | null> {
   const manifestRes = await fetch(
     `${getCommunityTunesBaseUrl()}/${MANIFEST_PATH}`,
+    // A blocked or slow mirror must not stall the sync loop; the cached copy stays.
+    { signal: AbortSignal.timeout(10_000) },
   );
   if (!manifestRes.ok) {
     console.warn(
@@ -95,7 +97,7 @@ async function fetchCommunityTuneRows(
   path: string,
 ): Promise<CommunityTuneRow[] | null> {
   const tunesUrl = resolveCommunityTunesUrl(getCommunityTunesBaseUrl(), path);
-  const tunesRes = await fetch(tunesUrl);
+  const tunesRes = await fetch(tunesUrl, { signal: AbortSignal.timeout(10_000) });
   if (!tunesRes.ok) {
     console.warn(
       `[CommunityTunes] tunes fetch failed for ${gameId}: HTTP ${tunesRes.status}; keeping cache`,

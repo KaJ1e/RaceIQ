@@ -160,7 +160,12 @@ export async function fetchReleases(currentVersion: string, latest?: GitHubRelea
 }> {
   const releases: GitHubRelease[] = [];
   for (let page = 1; ; page += 1) {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=50&page=${page}`, { headers: GH_HEADERS });
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=50&page=${page}`, {
+      headers: GH_HEADERS,
+      // GitHub is slow or unreachable on some networks; never let the background
+      // check hold a connection open indefinitely.
+      signal: AbortSignal.timeout(5_000),
+    });
     if (!res.ok) throw new Error(`Release list fetch failed: ${res.status}`);
     const pageReleases = await res.json() as GitHubRelease[];
     releases.push(...pageReleases);
@@ -187,7 +192,7 @@ export async function checkForUpdate(): Promise<UpdateState> {
   try {
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      { headers: GH_HEADERS },
+      { headers: GH_HEADERS, signal: AbortSignal.timeout(5_000) },
     );
     if (!res.ok) return { ...state, checked: true };
 

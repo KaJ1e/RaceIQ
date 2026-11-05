@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { detectPlatform, PLATFORM_LABEL, PlatformIcon } from "@/components/acc/acc-links";
+import { LazyYouTube } from "@/components/LazyYouTube";
 import { m } from "@/paraglide/messages";
 import { client } from "../../lib/rpc";
 import { Button } from "../ui/button";
@@ -55,13 +56,11 @@ function SetupVideo({ url }: { url: string }) {
     const vid = u.hostname.includes("youtube.com") ? u.searchParams.get("v") : u.hostname === "youtu.be" ? u.pathname.slice(1) : null;
     if (!vid) return null;
     return (
-      <Card className="rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <iframe
+      <Card className="overflow-hidden rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
+        <LazyYouTube
           src={`https://www.youtube.com/embed/${vid}`}
           title={m.f1setup_hotlap()}
           className="w-full aspect-video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
         />
       </Card>
     );
@@ -358,12 +357,10 @@ export function AccTrackGuide({ trackId, trackName }: { trackId: string; trackNa
   return (
     <div className="flex items-start justify-center h-full p-4">
       <Card className="w-full max-w-4xl rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <iframe
+        <LazyYouTube
           src={embedUrl}
           title={`${trackName} ${m.f1setup_track_guide()}`}
           className="w-full aspect-video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
         />
       </Card>
     </div>
