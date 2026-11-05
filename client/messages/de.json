@@ -2972,5 +2972,6 @@
   "opponent_recording_failed": "Aufzeichnung des Gegners fehlgeschlagen: {error}",
   "opponent_recording_dismiss": "Schließen",
   "ai_generated_badge": "KI-generiert · nur zur Orientierung",
-  "ai_data_flow_note": "Prompts werden an den gewählten Modellanbieter gesendet. Telemetriedateien bleiben auf diesem Computer."
+  "ai_data_flow_note": "Prompts werden an den gewählten Modellanbieter gesendet. Telemetriedateien bleiben auf diesem Computer.",
+  "network_unavailable_banner": "Online-Inhalte nicht erreichbar — lokale Daten werden angezeigt."
 }

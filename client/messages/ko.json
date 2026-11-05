@@ -2969,5 +2969,6 @@
   "opponent_recording_failed": "상대 차량 기록 실패: {error}",
   "opponent_recording_dismiss": "닫기",
   "ai_generated_badge": "AI 생성 · 참고용",
-  "ai_data_flow_note": "프롬프트는 선택한 모델 제공업체로 전송됩니다. 텔레메트리 파일은 이 컴퓨터에 남습니다."
+  "ai_data_flow_note": "프롬프트는 선택한 모델 제공업체로 전송됩니다. 텔레메트리 파일은 이 컴퓨터에 남습니다.",
+  "network_unavailable_banner": "온라인 콘텐츠를 사용할 수 없어 로컬 데이터를 표시합니다."
 }

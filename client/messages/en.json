@@ -2972,5 +2972,6 @@
   "opponent_recording_failed": "Opponent recording failed: {error}",
   "opponent_recording_dismiss": "Dismiss",
   "ai_generated_badge": "AI-generated · for reference only",
-  "ai_data_flow_note": "Prompts are sent to the model provider you choose. Telemetry files stay on this computer."
+  "ai_data_flow_note": "Prompts are sent to the model provider you choose. Telemetry files stay on this computer.",
+  "network_unavailable_banner": "Online content is unavailable — showing local data."
 }

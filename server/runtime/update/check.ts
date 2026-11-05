@@ -5,6 +5,7 @@ import { spawn } from "node:child_process";
 import { APP_VERSION } from "@raceiq/shared/platform/runtime/app-version";
 import { wsManager } from "../websocket-manager";
 import { isNewer } from "./version";
+import { recordOnlineFailure, recordOnlineSuccess } from "../network-health";
 import { IS_WINDOWS } from "../platform/shell";
 import { ROOT_DIR } from "../config/paths";
 export { isNewer };
@@ -194,8 +195,12 @@ export async function checkForUpdate(): Promise<UpdateState> {
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
       { headers: GH_HEADERS, signal: AbortSignal.timeout(5_000) },
     );
-    if (!res.ok) return { ...state, checked: true };
+    if (!res.ok) {
+      recordOnlineFailure("update", "HTTP " + res.status);
+      return { ...state, checked: true };
+    }
 
+    recordOnlineSuccess("update");
     const data = await res.json() as GitHubRelease;
     const latest = data.tag_name.replace(/^v/, "");
     const updateAvailable = isNewer(latest, VERSION);
@@ -222,7 +227,8 @@ export async function checkForUpdate(): Promise<UpdateState> {
     if (updateAvailable) {
       notifyUpdateAvailable(latest);
     }
-  } catch {
+  } catch (error) {
+    recordOnlineFailure("update", error instanceof Error ? error.message : String(error));
     state = { ...state, checked: true };
   }
   return state;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { GameId } from "@raceiq/shared/games/ids";
 import { loadSettings } from "../runtime/config/settings";
+import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
 
 /**
  * Community leaderboard CDN sync.
@@ -182,12 +183,14 @@ export async function syncLaptimes(
       console.log(`[Laptimes] synced ${rows.length} entry(ies) for ${gameId}`);
     }
 
+    recordOnlineSuccess("laptimes");
     cachedVersion = manifest.version;
     console.log(
       `[Laptimes] sync complete: ${total} total entry(ies) at version ${manifest.version}`,
     );
     return { synced: true, count: total, version: manifest.version };
   } catch (err) {
+    recordOnlineFailure("laptimes", err instanceof Error ? err.message : String(err));
     console.warn("[Laptimes] sync failed; keeping existing cache:", err instanceof Error ? err.message : err);
     return skippedResult(cachedVersion);
   } finally {

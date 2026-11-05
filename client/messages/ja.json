@@ -2968,5 +2968,6 @@
   "opponent_recording_failed": "対戦相手の記録に失敗しました: {error}",
   "opponent_recording_dismiss": "閉じる",
   "ai_generated_badge": "AI 生成・参考情報",
-  "ai_data_flow_note": "プロンプトは選択したモデル提供元に送信されます。テレメトリーファイルはこのコンピューターに残ります。"
+  "ai_data_flow_note": "プロンプトは選択したモデル提供元に送信されます。テレメトリーファイルはこのコンピューターに残ります。",
+  "network_unavailable_banner": "オンラインコンテンツを取得できません。ローカルデータを表示しています。"
 }

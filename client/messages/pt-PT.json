@@ -2968,5 +2968,6 @@
   "opponent_recording_failed": "Falha na gravação do adversário: {error}",
   "opponent_recording_dismiss": "Fechar",
   "ai_generated_badge": "Gerado por IA · apenas para referência",
-  "ai_data_flow_note": "Os prompts são enviados para o fornecedor de modelos escolhido. Os ficheiros de telemetria ficam neste computador."
+  "ai_data_flow_note": "Os prompts são enviados para o fornecedor de modelos escolhido. Os ficheiros de telemetria ficam neste computador.",
+  "network_unavailable_banner": "Conteúdo online indisponível — a mostrar dados locais."
 }

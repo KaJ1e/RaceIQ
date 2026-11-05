@@ -2969,5 +2969,6 @@
   "opponent_recording_failed": "Vastustajan tallennus epäonnistui: {error}",
   "opponent_recording_dismiss": "Sulje",
   "ai_generated_badge": "Tekoälyn tuottama · vain viitteeksi",
-  "ai_data_flow_note": "Kehotteet lähetetään valitsemallesi mallitarjoajalle. Telemetriatiedostot jäävät tälle tietokoneelle."
+  "ai_data_flow_note": "Kehotteet lähetetään valitsemallesi mallitarjoajalle. Telemetriatiedostot jäävät tälle tietokoneelle.",
+  "network_unavailable_banner": "Verkkosisältö ei ole saatavilla — näytetään paikalliset tiedot."
 }

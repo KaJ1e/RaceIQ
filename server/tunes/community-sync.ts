@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { loadSettings } from "../runtime/config/settings";
+import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
 import {
   getCommunityTunesSyncState,
   setCommunityTunesSyncState,
@@ -216,11 +217,13 @@ export async function syncCommunityTunes(
     }
 
     setCommunityTunesSyncState(manifest.version);
+    recordOnlineSuccess("tunes");
     console.log(
       `[CommunityTunes] synced ${total} tune(s) at version ${manifest.version}`,
     );
     return { synced: true, count: total, version: manifest.version };
   } catch (err) {
+    recordOnlineFailure("tunes", err instanceof Error ? err.message : String(err));
     console.warn(
       "[CommunityTunes] sync failed; keeping existing cache:",
       err instanceof Error ? err.message : err,

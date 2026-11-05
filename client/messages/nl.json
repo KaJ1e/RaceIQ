@@ -2968,5 +2968,6 @@
   "opponent_recording_failed": "Opname van tegenstander mislukt: {error}",
   "opponent_recording_dismiss": "Sluiten",
   "ai_generated_badge": "AI-gegenereerd · alleen ter indicatie",
-  "ai_data_flow_note": "Prompts worden naar de gekozen modelaanbieder verzonden. Telemetriebestanden blijven op deze computer."
+  "ai_data_flow_note": "Prompts worden naar de gekozen modelaanbieder verzonden. Telemetriebestanden blijven op deze computer.",
+  "network_unavailable_banner": "Online inhoud is niet bereikbaar — lokale gegevens worden getoond."
 }
