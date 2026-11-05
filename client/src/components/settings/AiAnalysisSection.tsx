@@ -32,6 +32,7 @@ export function AiAnalysisSection({ state }: { state: AiAnalysisState }) {
     <div className="mt-8 space-y-4">
       <h2 className="text-sm font-semibold text-app-text">{m.ai_analysis_provider_title()}</h2>
       <p className="text-xs text-app-text-muted">{m.ai_analysis_provider_desc()}</p>
+      <p className="text-xs text-app-text-muted">{m.ai_data_flow_note()}</p>
       <div className="space-y-4">
         <div>
           <Label htmlFor="ai-analysis-provider" className="mb-1 block text-xs text-app-text-muted">

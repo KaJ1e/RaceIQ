@@ -2970,5 +2970,7 @@
   "recording_processing_failed": "Processing failed: {error}",
   "recording_processing_refresh": "Refresh status",
   "opponent_recording_failed": "Opponent recording failed: {error}",
-  "opponent_recording_dismiss": "Dismiss"
+  "opponent_recording_dismiss": "Dismiss",
+  "ai_generated_badge": "AI-generated · for reference only",
+  "ai_data_flow_note": "Prompts are sent to the model provider you choose. Telemetry files stay on this computer."
 }

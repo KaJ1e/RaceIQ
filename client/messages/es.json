@@ -2966,5 +2966,7 @@
   "recording_processing_failed": "Error de procesamiento: {error}",
   "recording_processing_refresh": "Actualizar estado",
   "opponent_recording_failed": "Error en la grabación del oponente: {error}",
-  "opponent_recording_dismiss": "Cerrar"
+  "opponent_recording_dismiss": "Cerrar",
+  "ai_generated_badge": "Generado por IA · solo como referencia",
+  "ai_data_flow_note": "Los prompts se envían al proveedor de modelos que elijas. Los archivos de telemetría permanecen en este equipo."
 }

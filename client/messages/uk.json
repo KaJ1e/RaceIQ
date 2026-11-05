@@ -2966,5 +2966,7 @@
   "recording_processing_failed": "Помилка обробки: {error}",
   "recording_processing_refresh": "Оновити стан",
   "opponent_recording_failed": "Не вдалося записати суперника: {error}",
-  "opponent_recording_dismiss": "Закрити"
+  "opponent_recording_dismiss": "Закрити",
+  "ai_generated_badge": "Згенеровано ШІ · лише для довідки",
+  "ai_data_flow_note": "Запити надсилаються обраному постачальнику моделей. Файли телеметрії залишаються на цьому комп’ютері."
 }

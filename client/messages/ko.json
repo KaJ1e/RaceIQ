@@ -2967,5 +2967,7 @@
   "recording_processing_failed": "처리 실패: {error}",
   "recording_processing_refresh": "상태 새로 고침",
   "opponent_recording_failed": "상대 차량 기록 실패: {error}",
-  "opponent_recording_dismiss": "닫기"
+  "opponent_recording_dismiss": "닫기",
+  "ai_generated_badge": "AI 생성 · 참고용",
+  "ai_data_flow_note": "프롬프트는 선택한 모델 제공업체로 전송됩니다. 텔레메트리 파일은 이 컴퓨터에 남습니다."
 }

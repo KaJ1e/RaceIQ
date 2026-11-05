@@ -2970,5 +2970,7 @@
   "recording_processing_failed": "Verarbeitung fehlgeschlagen: {error}",
   "recording_processing_refresh": "Status aktualisieren",
   "opponent_recording_failed": "Aufzeichnung des Gegners fehlgeschlagen: {error}",
-  "opponent_recording_dismiss": "Schließen"
+  "opponent_recording_dismiss": "Schließen",
+  "ai_generated_badge": "KI-generiert · nur zur Orientierung",
+  "ai_data_flow_note": "Prompts werden an den gewählten Modellanbieter gesendet. Telemetriedateien bleiben auf diesem Computer."
 }

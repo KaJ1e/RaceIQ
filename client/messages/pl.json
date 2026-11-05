@@ -2966,5 +2966,7 @@
   "recording_processing_failed": "Przetwarzanie nie powiodło się: {error}",
   "recording_processing_refresh": "Odśwież stan",
   "opponent_recording_failed": "Nie udało się nagrać przeciwnika: {error}",
-  "opponent_recording_dismiss": "Zamknij"
+  "opponent_recording_dismiss": "Zamknij",
+  "ai_generated_badge": "Wygenerowane przez AI · tylko informacyjnie",
+  "ai_data_flow_note": "Prompty są wysyłane do wybranego dostawcy modeli. Pliki telemetrii pozostają na tym komputerze."
 }

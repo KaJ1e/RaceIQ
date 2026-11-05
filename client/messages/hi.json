@@ -2967,5 +2967,7 @@
   "recording_processing_failed": "प्रोसेसिंग विफल: {error}",
   "recording_processing_refresh": "स्थिति रीफ़्रेश करें",
   "opponent_recording_failed": "प्रतिद्वंद्वी की रिकॉर्डिंग विफल: {error}",
-  "opponent_recording_dismiss": "बंद करें"
+  "opponent_recording_dismiss": "बंद करें",
+  "ai_generated_badge": "AI द्वारा निर्मित · केवल संदर्भ हेतु",
+  "ai_data_flow_note": "प्रॉम्प्ट आपके चुने हुए मॉडल प्रदाता को भेजे जाते हैं। टेलीमेट्री फ़ाइलें इस कंप्यूटर पर ही रहती हैं।"
 }

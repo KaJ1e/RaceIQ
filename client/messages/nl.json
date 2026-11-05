@@ -2966,5 +2966,7 @@
   "recording_processing_failed": "Verwerking mislukt: {error}",
   "recording_processing_refresh": "Status bijwerken",
   "opponent_recording_failed": "Opname van tegenstander mislukt: {error}",
-  "opponent_recording_dismiss": "Sluiten"
+  "opponent_recording_dismiss": "Sluiten",
+  "ai_generated_badge": "AI-gegenereerd · alleen ter indicatie",
+  "ai_data_flow_note": "Prompts worden naar de gekozen modelaanbieder verzonden. Telemetriebestanden blijven op deze computer."
 }

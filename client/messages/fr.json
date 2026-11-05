@@ -2966,5 +2966,7 @@
   "recording_processing_failed": "Échec du traitement : {error}",
   "recording_processing_refresh": "Actualiser le statut",
   "opponent_recording_failed": "Échec de l’enregistrement de l’adversaire : {error}",
-  "opponent_recording_dismiss": "Fermer"
+  "opponent_recording_dismiss": "Fermer",
+  "ai_generated_badge": "Généré par IA · à titre indicatif",
+  "ai_data_flow_note": "Les prompts sont envoyés au fournisseur de modèles choisi. Les fichiers de télémétrie restent sur cet ordinateur."
 }
