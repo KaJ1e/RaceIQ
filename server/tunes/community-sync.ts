@@ -1,4 +1,5 @@
 import { z } from "zod";
+import fm2023Tunes from "./seed/fm-2023-tunes.json";
 import { loadSettings } from "../runtime/config/settings";
 import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
 import {
@@ -27,6 +28,16 @@ const SYNC_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 /** Games the CDN publishes today. Built-in catalog is FM-only, matching this. */
 const SYNCED_GAME_IDS = ["fm-2023"] as const;
+
+/**
+ * Snapshot shipped with the app. Used only when the catalogue has never synced
+ * (first run on a blocked network), so an offline user still sees community
+ * tunes instead of an empty list. A successful sync replaces it.
+ */
+const SEED_SNAPSHOTS: Partial<Record<(typeof SYNCED_GAME_IDS)[number], unknown>> = {
+  "fm-2023": fm2023Tunes,
+};
+const SEED_VERSION = "seed:2026-11-05";
 
 function getCommunityTunesBaseUrl(): string {
   // Explicit environment override wins (mirrors, tests), then the value stored in
@@ -168,6 +179,28 @@ function toCommunityTuneRows(
 }
 
 /**
+ * Load the bundled snapshot into the catalogue. Only used on a first run that
+ * cannot reach the CDN — once a real sync succeeds, the snapshot is never used
+ * again for that install.
+ */
+async function applySeedSnapshot(): Promise<SyncResult> {
+  let total = 0;
+  for (const gameId of SYNCED_GAME_IDS) {
+    const raw = SEED_SNAPSHOTS[gameId];
+    if (!raw) continue;
+    const rows = toCommunityTuneRows(gameId, raw);
+    if (!rows || rows.length === 0) continue;
+    total += await replaceCommunityTunes(gameId, rows);
+  }
+  if (total === 0) return { synced: false, count: 0, version: null };
+  setCommunityTunesSyncState(SEED_VERSION);
+  console.log(
+    `[CommunityTunes] offline: loaded bundled snapshot (${total} tunes, ${SEED_VERSION})`,
+  );
+  return { synced: false, count: total, version: SEED_VERSION };
+}
+
+/**
  * Run one sync pass. Returns `{synced:false}` when the manifest version matches
  * the stored version (no work done) or when a failure keeps the existing cache.
  *
@@ -188,6 +221,7 @@ export async function syncCommunityTunes(
   try {
     const manifest = await fetchManifest();
     if (!manifest) {
+      if (!stored.version) return applySeedSnapshot();
       return syncSkippedResult(stored.version);
     }
 
@@ -228,6 +262,9 @@ export async function syncCommunityTunes(
       "[CommunityTunes] sync failed; keeping existing cache:",
       err instanceof Error ? err.message : err,
     );
+    // First run on a blocked network: fall back to the snapshot shipped with the
+    // app so the catalogue is never empty. Later failures keep the synced rows.
+    if (!stored.version) return applySeedSnapshot();
     return syncSkippedResult(stored.version);
   } finally {
     syncInProgress = false;
