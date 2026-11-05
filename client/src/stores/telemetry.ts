@@ -37,6 +37,8 @@ export interface DisplaySettings {
   /** Server-injected canonical active recording directory. */
   resolvedRecordingDirectory?: string;
   udpPort?: number;
+  /** Optional mirror for the community tunes / lap-time catalogue. Empty uses the built-in host. */
+  communityTunesUrl?: string;
   hudHostname?: string;
   /** Server-injected: whether a Gemini API key is stored */
   geminiApiKeySet?: boolean;

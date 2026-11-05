@@ -1,13 +1,17 @@
 ## Unreleased
 
 ### Features
+- Serve community setups and lap-time data from a mirror your network can reach: set a mirror address in Settings → Connection, or leave it empty to use the public host.
 - Choose DeepSeek for analysis, chat, auto-tune and driver profiles with its own API key. The model picker reads the models available to that key instead of using a fixed list, preselects `deepseek-flash`, keeps tool calls working, and only offers image attachments on models that accept them.
 
 ### Fixes
 - Open lap analysis and lap comparisons faster after a long session: a player lap now loads from its own published capture chunk instead of streaming the whole session capture from the first byte, which cost about 30 seconds per lap on a 5 GB stint.
+- Say why a track-guide video stayed blank and offer to open it on YouTube instead of leaving an empty player.
+- Explain AI provider connection problems in plain language instead of the raw transport error.
 
 ### Internal
 - Require an explicitly configured model for AI evaluation runs.
+- Add shared helpers for classifying provider transport errors, validating mirror URLs, and deciding when a video embed should fall back.
 
 ## v0.21.1 - 2026-11-03
 

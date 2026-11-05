@@ -2973,5 +2973,14 @@
   "opponent_recording_dismiss": "Dismiss",
   "ai_generated_badge": "AI-generated · for reference only",
   "ai_data_flow_note": "Prompts are sent to the model provider you choose. Telemetry files stay on this computer.",
-  "network_unavailable_banner": "Online content is unavailable — showing local data."
+  "network_unavailable_banner": "Online content is unavailable — showing local data.",
+  "ai_error_network": "Cannot reach the AI provider. Check your network or proxy, then try again.",
+  "ai_error_timeout": "The AI provider took too long to respond. Try again.",
+  "video_embed_unavailable": "The video did not load. YouTube may be blocked on this network.",
+  "video_embed_open": "Open on YouTube",
+  "settings_network_mirror_title": "Community data mirror",
+  "settings_network_mirror_desc": "Route community tune and lap-time downloads through a mirror your network can reach. Leave empty to use the built-in host. The COMMUNITY_TUNES_URL environment variable overrides this setting.",
+  "settings_network_mirror_label": "Mirror URL",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "Enter an http(s) URL, or leave the field empty."
 }

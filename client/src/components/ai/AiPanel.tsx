@@ -5,6 +5,8 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useSta
 import { ChatPanel } from "@/components/ai-chat/ChatPanel";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/settings";
+import { classifyAiError } from "@raceiq/frontend-pure/ai-error";
+import { friendlyAiErrorMessage } from "@/lib/ai-error";
 import { type ChatStreamError, type ChatStreamStatus, readChatStream } from "@/lib/chat-stream";
 import { isAiAnalysisConfigured, launchAiFeature } from "@/lib/is-ai-configured";
 import { resolveCssColor } from "@raceiq/scene-3d/rendering/css-values";
@@ -23,6 +25,7 @@ import { findSegment } from "./analysis-utils";
 type StreamErrorEvent = ChatStreamError;
 
 function formatStreamError(event: StreamErrorEvent): string {
+  if (classifyAiError(event.message)) return friendlyAiErrorMessage(event.message);
   const parts = [event.message];
   const statusCode = typeof event.statusCode === "number" ? event.statusCode : event.upstream?.code;
   const status = event.upstream?.status;
@@ -34,7 +37,7 @@ function formatStreamError(event: StreamErrorEvent): string {
 }
 
 function toErrorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : m.aipanel_fetch_failed();
+  return err instanceof Error ? friendlyAiErrorMessage(err.message) : m.aipanel_fetch_failed();
 }
 function safeParseAnalysis(raw: string): AnalysisData | null {
   const parsed = parseLapAnalysisForDisplay(raw);

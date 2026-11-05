@@ -2969,5 +2969,14 @@
   "opponent_recording_dismiss": "Sluiten",
   "ai_generated_badge": "AI-gegenereerd · alleen ter indicatie",
   "ai_data_flow_note": "Prompts worden naar de gekozen modelaanbieder verzonden. Telemetriebestanden blijven op deze computer.",
-  "network_unavailable_banner": "Online inhoud is niet bereikbaar — lokale gegevens worden getoond."
+  "network_unavailable_banner": "Online inhoud is niet bereikbaar — lokale gegevens worden getoond.",
+  "ai_error_network": "Kan de AI-provider niet bereiken. Controleer je netwerk of proxy en probeer het opnieuw.",
+  "ai_error_timeout": "De AI-provider deed er te lang over om te antwoorden. Probeer het opnieuw.",
+  "video_embed_unavailable": "De video is niet geladen. YouTube is mogelijk geblokkeerd op dit netwerk.",
+  "video_embed_open": "Openen op YouTube",
+  "settings_network_mirror_title": "Mirror voor communitygegevens",
+  "settings_network_mirror_desc": "Haal community-setups en rondetijden op via een mirror die je netwerk kan bereiken. Laat leeg om de ingebouwde host te gebruiken. De omgevingsvariabele COMMUNITY_TUNES_URL overschrijft deze instelling.",
+  "settings_network_mirror_label": "Mirror-URL",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "Voer een http(s)-URL in of laat het veld leeg."
 }

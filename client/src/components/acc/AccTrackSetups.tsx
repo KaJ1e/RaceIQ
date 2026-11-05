@@ -57,11 +57,13 @@ function SetupVideo({ url }: { url: string }) {
     if (!vid) return null;
     return (
       <Card className="overflow-hidden rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <LazyYouTube
-          src={`https://www.youtube.com/embed/${vid}`}
-          title={m.f1setup_hotlap()}
-          className="w-full aspect-video"
-        />
+        <div className="relative w-full aspect-video">
+          <LazyYouTube
+            src={`https://www.youtube.com/embed/${vid}`}
+            title={m.f1setup_hotlap()}
+            className="absolute inset-0"
+          />
+        </div>
       </Card>
     );
   } catch {
@@ -357,11 +359,13 @@ export function AccTrackGuide({ trackId, trackName }: { trackId: string; trackNa
   return (
     <div className="flex items-start justify-center h-full p-4">
       <Card className="w-full max-w-4xl rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <LazyYouTube
-          src={embedUrl}
-          title={`${trackName} ${m.f1setup_track_guide()}`}
-          className="w-full aspect-video"
-        />
+        <div className="relative w-full aspect-video">
+          <LazyYouTube
+            src={embedUrl}
+            title={`${trackName} ${m.f1setup_track_guide()}`}
+            className="absolute inset-0"
+          />
+        </div>
       </Card>
     </div>
   );

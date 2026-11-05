@@ -4,3 +4,6 @@ packages/frontend-pure/test/temperature.test.ts
 packages/frontend-pure/test/iracing-car-sort.test.ts
 packages/frontend-pure/test/utc-date.test.ts
 packages/frontend-pure/test/route-search.test.ts
+packages/frontend-pure/test/ai-error.test.ts
+packages/frontend-pure/test/mirror-url.test.ts
+packages/frontend-pure/test/video-embed.test.ts

@@ -2969,5 +2969,14 @@
   "opponent_recording_dismiss": "Cerrar",
   "ai_generated_badge": "Generado por IA · solo como referencia",
   "ai_data_flow_note": "Los prompts se envían al proveedor de modelos que elijas. Los archivos de telemetría permanecen en este equipo.",
-  "network_unavailable_banner": "El contenido en línea no está disponible; se muestran datos locales."
+  "network_unavailable_banner": "El contenido en línea no está disponible; se muestran datos locales.",
+  "ai_error_network": "No se puede conectar con el proveedor de IA. Revisa tu red o el proxy e inténtalo de nuevo.",
+  "ai_error_timeout": "El proveedor de IA tardó demasiado en responder. Inténtalo de nuevo.",
+  "video_embed_unavailable": "El vídeo no se cargó. Puede que YouTube esté bloqueado en esta red.",
+  "video_embed_open": "Abrir en YouTube",
+  "settings_network_mirror_title": "Espejo de datos de la comunidad",
+  "settings_network_mirror_desc": "Descarga las configuraciones y los tiempos de vuelta de la comunidad a través de un espejo accesible desde tu red. Déjalo vacío para usar el servidor integrado. La variable de entorno COMMUNITY_TUNES_URL tiene prioridad sobre este ajuste.",
+  "settings_network_mirror_label": "URL del espejo",
+  "settings_network_mirror_placeholder": "https://espejo.example.com/raceiq",
+  "settings_network_mirror_invalid": "Introduce una URL http(s) o deja el campo vacío."
 }

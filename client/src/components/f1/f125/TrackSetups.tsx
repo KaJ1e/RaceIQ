@@ -19,11 +19,13 @@ function SetupVideo({ url }: { url: string }) {
   if (!vid) return null;
   return (
     <div className="rounded-lg overflow-hidden border border-app-border/20">
-      <LazyYouTube
-        src={`https://www.youtube.com/embed/${vid}`}
-        title={m.f1setup_hotlap()}
-        className="w-full aspect-video"
-      />
+      <div className="relative w-full aspect-video">
+        <LazyYouTube
+          src={`https://www.youtube.com/embed/${vid}`}
+          title={m.f1setup_hotlap()}
+          className="absolute inset-0"
+        />
+      </div>
     </div>
   );
 }
