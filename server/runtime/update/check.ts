@@ -250,6 +250,67 @@ export function startUpdateCheckSchedule(): void {
   i.unref?.();
 }
 
+/**
+ * GitHub is blackholed on some networks, and the CDN its asset URL redirects to
+ * can stall mid-transfer. The installer is tens of megabytes, so one deadline
+ * for the whole request would cut off slow-but-healthy links; abort instead
+ * when the connection stops making progress, re-arming on every chunk. Without
+ * this, a blocked host leaves `applyUpdate` awaiting a fetch that never settles.
+ */
+const DOWNLOAD_CONNECT_TIMEOUT_MS = 15_000;
+const DOWNLOAD_IDLE_TIMEOUT_MS = 15_000;
+
+async function downloadInstaller(url: string, installerPath: string): Promise<void> {
+  const controller = new AbortController();
+  let watchdog: ReturnType<typeof setTimeout> | null = null;
+  const armWatchdog = (ms: number): void => {
+    if (watchdog) clearTimeout(watchdog);
+    watchdog = setTimeout(() => controller.abort(), ms);
+    watchdog.unref?.();
+  };
+
+  try {
+    armWatchdog(DOWNLOAD_CONNECT_TIMEOUT_MS);
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+    armWatchdog(DOWNLOAD_IDLE_TIMEOUT_MS);
+
+    const contentLength = Number(res.headers.get("content-length") || 0);
+    const body = res.body;
+
+    if (!body || !contentLength) {
+      const buffer = await res.arrayBuffer();
+      writeFileSync(installerPath, Buffer.from(buffer));
+      return;
+    }
+
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    let lastBroadcast = 0;
+
+    for await (const chunk of body) {
+      chunks.push(chunk);
+      received += chunk.length;
+      armWatchdog(DOWNLOAD_IDLE_TIMEOUT_MS);
+      const percent = Math.round((received / contentLength) * 100);
+      if (percent >= lastBroadcast + 5 || percent === 100) {
+        lastBroadcast = percent;
+        wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent });
+      }
+    }
+
+    writeFileSync(installerPath, Buffer.concat(chunks));
+  } catch (error) {
+    const message = controller.signal.aborted
+      ? "Installer download stalled — check the connection to github.com and try again."
+      : error instanceof Error ? error.message : String(error);
+    recordOnlineFailure("update", message);
+    throw new Error(message);
+  } finally {
+    if (watchdog) clearTimeout(watchdog);
+  }
+}
+
 /** Downloads the Inno Setup installer and runs it silently. Inno handles process kill, file swap, registry update, and relaunch. */
 export async function applyUpdate(): Promise<void> {
   if (IN_APP_UPDATE_DISABLED) {
@@ -288,33 +349,7 @@ export async function applyUpdate(): Promise<void> {
     console.log(`[Update] Downloading installer v${version} from ${downloadUrl}`);
     wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent: 0 });
 
-    const res = await fetch(downloadUrl);
-    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-
-    const contentLength = Number(res.headers.get("content-length") || 0);
-    const body = res.body;
-
-    if (!body || !contentLength) {
-      const buffer = await res.arrayBuffer();
-      writeFileSync(installerPath, Buffer.from(buffer));
-    } else {
-      const chunks: Uint8Array[] = [];
-      let received = 0;
-      let lastBroadcast = 0;
-
-      for await (const chunk of body) {
-        chunks.push(chunk);
-        received += chunk.length;
-        const percent = Math.round((received / contentLength) * 100);
-        if (percent >= lastBroadcast + 5 || percent === 100) {
-          lastBroadcast = percent;
-          wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent });
-        }
-      }
-
-      const buffer = Buffer.concat(chunks);
-      writeFileSync(installerPath, buffer);
-    }
+    await downloadInstaller(downloadUrl, installerPath);
 
     console.log(`[Update] Downloaded to ${installerPath}`);
   }
