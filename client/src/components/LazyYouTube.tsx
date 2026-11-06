@@ -67,10 +67,10 @@ export function LazyYouTube({ src, title, className }: { src: string; title: str
           onClick={() => setActive(true)}
           title={title}
           aria-label={title}
-          className="group flex h-full w-full items-center justify-center bg-black/70"
+          className="group flex h-full w-full items-center justify-center bg-app-bg/70"
         >
           <span
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black transition group-hover:scale-105"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-app-surface/90 text-app-text ring-1 ring-app-border transition group-hover:scale-105"
             aria-hidden="true"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current"><path d="M8 5v14l11-7z" /></svg>
@@ -80,7 +80,7 @@ export function LazyYouTube({ src, title, className }: { src: string; title: str
       {showFallback && (
         <div
           role="status"
-          className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-2 gap-y-1 bg-black/85 px-2 py-1.5 text-app-micro text-white"
+          className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-2 gap-y-1 bg-app-bg/85 px-2 py-1.5 text-app-micro text-app-text"
         >
           <span className="min-w-0 flex-1">{m.video_embed_unavailable()}</span>
           <button
