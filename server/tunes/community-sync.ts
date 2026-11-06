@@ -1,5 +1,9 @@
+// The ambient `*.json.gz` declaration is global; only a triple-slash reference
+// carries it into projects that reach this module transitively.
+// oxlint-disable-next-line typescript/triple-slash-reference -- no import form exists for a global declaration.
+/// <reference path="../sync/seed-assets.d.ts" />
 import { z } from "zod";
-import fm2023Tunes from "./seed/fm-2023-tunes.json";
+import fm2023TunesSeedPath from "./seed/fm-2023-tunes.json.gz" with { type: "file" };
 import { loadSettings } from "../runtime/config/settings";
 import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
 import {
@@ -33,9 +37,16 @@ const SYNCED_GAME_IDS = ["fm-2023"] as const;
  * Snapshot shipped with the app. Used only when the catalogue has never synced
  * (first run on a blocked network), so an offline user still sees community
  * tunes instead of an empty list. A successful sync replaces it.
+ *
+ * The snapshot ships gzip-compressed and is imported as a plain path
+ * (`with { type: "file" }`), so importing this module neither inflates nor
+ * parses it; the online path never touches it at all. Bun embeds the referenced
+ * file in `bun build --compile` output, and `Bun.file(path)` reads the embedded
+ * copy back. Decompressed bytes are pinned by
+ * apps/backend/test/sync/seed-snapshots.test.ts.
  */
-const SEED_SNAPSHOTS: Partial<Record<(typeof SYNCED_GAME_IDS)[number], unknown>> = {
-  "fm-2023": fm2023Tunes,
+const SEED_PATHS: Partial<Record<(typeof SYNCED_GAME_IDS)[number], string>> = {
+  "fm-2023": fm2023TunesSeedPath,
 };
 const SEED_VERSION = "seed:2026-11-05";
 
@@ -182,6 +193,13 @@ function toCommunityTuneRows(
   return rows;
 }
 
+async function readSeedSnapshot(path: string): Promise<unknown> {
+  const compressed = await Bun.file(path).arrayBuffer();
+  return JSON.parse(
+    new TextDecoder().decode(Bun.gunzipSync(new Uint8Array(compressed))),
+  );
+}
+
 /**
  * Load the bundled snapshot into the catalogue. Only used on a first run that
  * cannot reach the CDN — once a real sync succeeds, the snapshot is never used
@@ -190,9 +208,9 @@ function toCommunityTuneRows(
 async function applySeedSnapshot(): Promise<SyncResult> {
   let total = 0;
   for (const gameId of SYNCED_GAME_IDS) {
-    const raw = SEED_SNAPSHOTS[gameId];
-    if (!raw) continue;
-    const rows = toCommunityTuneRows(gameId, raw);
+    const path = SEED_PATHS[gameId];
+    if (!path) continue;
+    const rows = toCommunityTuneRows(gameId, await readSeedSnapshot(path));
     if (!rows || rows.length === 0) continue;
     total += await replaceCommunityTunes(gameId, rows);
   }

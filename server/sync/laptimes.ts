@@ -1,10 +1,14 @@
+// The ambient `*.json.gz` declaration is global; only a triple-slash reference
+// carries it into projects that reach this module transitively.
+// oxlint-disable-next-line typescript/triple-slash-reference -- no import form exists for a global declaration.
+/// <reference path="./seed-assets.d.ts" />
 import { z } from "zod";
 import type { GameId } from "@raceiq/shared/games/ids";
 import { loadSettings } from "../runtime/config/settings";
 import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
-import accSeed from "./seed/acc.json";
-import acEvoSeed from "./seed/ac-evo.json";
-import forzaSeed from "./seed/forza.json";
+import accSeedPath from "./seed/acc.json.gz" with { type: "file" };
+import acEvoSeedPath from "./seed/ac-evo.json.gz" with { type: "file" };
+import forzaSeedPath from "./seed/forza.json.gz" with { type: "file" };
 
 /**
  * Community leaderboard CDN sync.
@@ -42,11 +46,18 @@ const MANIFEST_ENTRIES = Object.entries(MANIFEST_KEY_BY_GAME) as Array<
  * Reference leaderboards shipped with the app. They are only loaded when the
  * first sync fails and the cache is empty, so a blocked network still shows the
  * community lap-time lists instead of nothing. A successful sync replaces them.
+ *
+ * Snapshots ship gzip-compressed and are imported as plain paths
+ * (`with { type: "file" }`), so importing this module neither inflates nor
+ * parses them; the online path never touches them at all. Bun embeds the
+ * referenced files in `bun build --compile` output, and `Bun.file(path)` reads
+ * the embedded copy back. Decompressed bytes are pinned by
+ * apps/backend/test/sync/seed-snapshots.test.ts.
  */
-const SEED_BY_GAME: Partial<Record<GameId, unknown>> = {
-  acc: accSeed,
-  "ac-evo": acEvoSeed,
-  "fm-2023": forzaSeed,
+const SEED_PATHS: Partial<Record<GameId, string>> = {
+  acc: accSeedPath,
+  "ac-evo": acEvoSeedPath,
+  "fm-2023": forzaSeedPath,
 };
 const SEED_VERSION = "seed:2026-11-05";
 
@@ -156,14 +167,24 @@ function parseLaptimeRows(manifestKey: string, raw: unknown): LaptimeEntry[] | n
   return rows;
 }
 
+async function readSeedSnapshot(path: string): Promise<unknown> {
+  const compressed = await Bun.file(path).arrayBuffer();
+  return JSON.parse(
+    new TextDecoder().decode(Bun.gunzipSync(new Uint8Array(compressed))),
+  );
+}
+
 /**
  * Load the bundled reference leaderboards. First run only: once a real sync has
  * populated the cache, the snapshot is never reloaded for this process.
  */
-function applySeedLaptimes(): LaptimeSyncResult {
+async function applySeedLaptimes(): Promise<LaptimeSyncResult> {
   let total = 0;
-  for (const [gameId, raw] of Object.entries(SEED_BY_GAME) as Array<[GameId, unknown]>) {
-    const rows = parseLaptimeRows(MANIFEST_KEY_BY_GAME[gameId] ?? gameId, raw);
+  for (const [gameId, path] of Object.entries(SEED_PATHS) as Array<[GameId, string]>) {
+    const rows = parseLaptimeRows(
+      MANIFEST_KEY_BY_GAME[gameId] ?? gameId,
+      await readSeedSnapshot(path),
+    );
     if (!rows || rows.length === 0) continue;
     cache.set(gameId, rows);
     total += rows.length;
@@ -190,7 +211,7 @@ export async function syncLaptimes(
   try {
     const manifest = await fetchManifest();
     if (!manifest) {
-      if (cache.size === 0) return applySeedLaptimes();
+      if (cache.size === 0) return await applySeedLaptimes();
       return skippedResult(cachedVersion);
     }
 
@@ -229,7 +250,7 @@ export async function syncLaptimes(
     return { synced: true, count: total, version: manifest.version };
   } catch (err) {
     recordOnlineFailure("laptimes", err instanceof Error ? err.message : String(err));
-    if (cache.size === 0) return applySeedLaptimes();
+    if (cache.size === 0) return await applySeedLaptimes();
     console.warn("[Laptimes] sync failed; keeping existing cache:", err instanceof Error ? err.message : err);
     return skippedResult(cachedVersion);
   } finally {
