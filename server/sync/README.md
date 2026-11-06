@@ -22,3 +22,5 @@ Owns synchronization of community leaderboard lap times from the configured comm
 ## Testing
 
 Exercise `syncLaptimes` with mocked manifest and per-game fetch responses, covering unchanged versions, forced refreshes, partial game failures, invalid rows, and relative or absolute payload paths. Verify `getLaptimes` retains prior rows for failed games and returns newly validated rows for successful games.
+
+Every test file in one `bun test` invocation shares this module's cache, version and refresh timer. Call `resetLaptimesStateForTest()` in `beforeEach` so offline-seed coverage does not depend on which file ran first.
