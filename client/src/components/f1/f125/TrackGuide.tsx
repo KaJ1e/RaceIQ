@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { F125TrackData, F125TrackSummary } from "@/components/f1/f125/types";
+import { LazyYouTube } from "@/components/LazyYouTube";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { client } from "@/lib/rpc";
@@ -128,12 +129,10 @@ export function F125TrackGuide({ trackId }: { trackId: string }) {
                 {activeGuide.videoUrl && (
                   <div className="mb-4 w-full overflow-hidden rounded-lg border border-app-border/30 @3xl/workspace:float-right @3xl/workspace:ml-4 @3xl/workspace:mb-4 @3xl/workspace:w-[45%]">
                     <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                      <iframe
+                      <LazyYouTube
                         src={toEmbedUrl(activeGuide.videoUrl)}
                         title={m.f1setup_track_guide()}
                         className="absolute inset-0 w-full h-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
                       />
                     </div>
                   </div>

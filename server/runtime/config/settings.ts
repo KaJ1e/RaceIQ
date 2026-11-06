@@ -14,10 +14,25 @@ const SETTINGS_PATH = `${SETTINGS_DIR}/settings.json`;
 // explicitly pick a provider in Settings before any AI feature runs.
 const AiProviderSchema = z.enum(["", "gemini", "openai", "anthropic", "deepseek", "openai-compatible"]).default("");
 
+/** Absolute http(s) URL, scheme case-insensitive — mirrors the client's mirror-url rule. */
+const COMMUNITY_MIRROR_URL = /^https?:\/\/[^\s]+$/i;
+
 const AppSettingsSchema = z.object({
   onboardingComplete: z.boolean().default(false),
   driverName: z.string().default(""),
   hudHostname: z.string().trim().toLowerCase().refine(value => normalizeHudHostname(value) !== null).default(""),
+  // Optional mirror for the community tunes / lap-time CDN. Empty keeps the
+  // built-in host; a value must be an absolute http(s) origin+path without a
+  // trailing slash so requests stay predictable. Normalise first, then judge the
+  // normalised value — otherwise "https://///" trims down to "https:" and only
+  // then looks like a URL. Same rule as packages/frontend-pure/src/mirror-url.ts:
+  // scheme case-insensitive, so a value the client accepted is not a server 400.
+  communityTunesUrl: z
+    .string()
+    .trim()
+    .default("")
+    .transform((value) => value.replace(/\/+$/, ""))
+    .refine((value) => value === "" || COMMUNITY_MIRROR_URL.test(value), "communityTunesUrl must be empty or an http(s) URL"),
   udpPort: z.number().int().min(1024).max(65535).default(5301),
   unit: z.enum(["metric", "imperial"]).default("metric"),
   temperatureUnit: z.enum(["C", "F"]).default("C"),

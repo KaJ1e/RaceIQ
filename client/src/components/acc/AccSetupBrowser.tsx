@@ -169,6 +169,9 @@ function AccSetupPanel({ setup }: { setup: AccSetup }) {
       if (!res.ok) return null;
       return (await res.json()) as { uploadDate?: string; downloadUrl?: string };
     },
+    // Best-effort: the server already caps the lookup at 5 s and answers empty
+    // when YouTube is unreachable, so retrying only re-pays the deadline.
+    retry: false,
   });
   // downloadUrl often duplicates the video link for guide-only setups — only
   // treat a non-video URL, a Drive link, or the yt-meta-resolved link as a file.

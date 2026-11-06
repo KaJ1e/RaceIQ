@@ -5,6 +5,7 @@ import { spawn } from "node:child_process";
 import { APP_VERSION } from "@raceiq/shared/platform/runtime/app-version";
 import { wsManager } from "../websocket-manager";
 import { isNewer } from "./version";
+import { recordOnlineFailure, recordOnlineSuccess } from "../network-health";
 import { IS_WINDOWS } from "../platform/shell";
 import { ROOT_DIR } from "../config/paths";
 export { isNewer };
@@ -160,7 +161,12 @@ export async function fetchReleases(currentVersion: string, latest?: GitHubRelea
 }> {
   const releases: GitHubRelease[] = [];
   for (let page = 1; ; page += 1) {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=50&page=${page}`, { headers: GH_HEADERS });
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=50&page=${page}`, {
+      headers: GH_HEADERS,
+      // GitHub is slow or unreachable on some networks; never let the background
+      // check hold a connection open indefinitely.
+      signal: AbortSignal.timeout(5_000),
+    });
     if (!res.ok) throw new Error(`Release list fetch failed: ${res.status}`);
     const pageReleases = await res.json() as GitHubRelease[];
     releases.push(...pageReleases);
@@ -187,10 +193,14 @@ export async function checkForUpdate(): Promise<UpdateState> {
   try {
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`,
-      { headers: GH_HEADERS },
+      { headers: GH_HEADERS, signal: AbortSignal.timeout(5_000) },
     );
-    if (!res.ok) return { ...state, checked: true };
+    if (!res.ok) {
+      recordOnlineFailure("update", "HTTP " + res.status);
+      return { ...state, checked: true };
+    }
 
+    recordOnlineSuccess("update");
     const data = await res.json() as GitHubRelease;
     const latest = data.tag_name.replace(/^v/, "");
     const updateAvailable = isNewer(latest, VERSION);
@@ -217,7 +227,8 @@ export async function checkForUpdate(): Promise<UpdateState> {
     if (updateAvailable) {
       notifyUpdateAvailable(latest);
     }
-  } catch {
+  } catch (error) {
+    recordOnlineFailure("update", error instanceof Error ? error.message : String(error));
     state = { ...state, checked: true };
   }
   return state;
@@ -237,6 +248,67 @@ export function startUpdateCheckSchedule(): void {
   }
   const i = setInterval(() => checkForUpdate(), FOUR_HOURS_MS);
   i.unref?.();
+}
+
+/**
+ * GitHub is blackholed on some networks, and the CDN its asset URL redirects to
+ * can stall mid-transfer. The installer is tens of megabytes, so one deadline
+ * for the whole request would cut off slow-but-healthy links; abort instead
+ * when the connection stops making progress, re-arming on every chunk. Without
+ * this, a blocked host leaves `applyUpdate` awaiting a fetch that never settles.
+ */
+const DOWNLOAD_CONNECT_TIMEOUT_MS = 15_000;
+const DOWNLOAD_IDLE_TIMEOUT_MS = 15_000;
+
+async function downloadInstaller(url: string, installerPath: string): Promise<void> {
+  const controller = new AbortController();
+  let watchdog: ReturnType<typeof setTimeout> | null = null;
+  const armWatchdog = (ms: number): void => {
+    if (watchdog) clearTimeout(watchdog);
+    watchdog = setTimeout(() => controller.abort(), ms);
+    watchdog.unref?.();
+  };
+
+  try {
+    armWatchdog(DOWNLOAD_CONNECT_TIMEOUT_MS);
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+    armWatchdog(DOWNLOAD_IDLE_TIMEOUT_MS);
+
+    const contentLength = Number(res.headers.get("content-length") || 0);
+    const body = res.body;
+
+    if (!body || !contentLength) {
+      const buffer = await res.arrayBuffer();
+      writeFileSync(installerPath, Buffer.from(buffer));
+      return;
+    }
+
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    let lastBroadcast = 0;
+
+    for await (const chunk of body) {
+      chunks.push(chunk);
+      received += chunk.length;
+      armWatchdog(DOWNLOAD_IDLE_TIMEOUT_MS);
+      const percent = Math.round((received / contentLength) * 100);
+      if (percent >= lastBroadcast + 5 || percent === 100) {
+        lastBroadcast = percent;
+        wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent });
+      }
+    }
+
+    writeFileSync(installerPath, Buffer.concat(chunks));
+  } catch (error) {
+    const message = controller.signal.aborted
+      ? "Installer download stalled — check the connection to github.com and try again."
+      : error instanceof Error ? error.message : String(error);
+    recordOnlineFailure("update", message);
+    throw new Error(message);
+  } finally {
+    if (watchdog) clearTimeout(watchdog);
+  }
 }
 
 /** Downloads the Inno Setup installer and runs it silently. Inno handles process kill, file swap, registry update, and relaunch. */
@@ -277,33 +349,7 @@ export async function applyUpdate(): Promise<void> {
     console.log(`[Update] Downloading installer v${version} from ${downloadUrl}`);
     wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent: 0 });
 
-    const res = await fetch(downloadUrl);
-    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-
-    const contentLength = Number(res.headers.get("content-length") || 0);
-    const body = res.body;
-
-    if (!body || !contentLength) {
-      const buffer = await res.arrayBuffer();
-      writeFileSync(installerPath, Buffer.from(buffer));
-    } else {
-      const chunks: Uint8Array[] = [];
-      let received = 0;
-      let lastBroadcast = 0;
-
-      for await (const chunk of body) {
-        chunks.push(chunk);
-        received += chunk.length;
-        const percent = Math.round((received / contentLength) * 100);
-        if (percent >= lastBroadcast + 5 || percent === 100) {
-          lastBroadcast = percent;
-          wsManager.broadcastNotification({ type: "update-progress", stage: "downloading", percent });
-        }
-      }
-
-      const buffer = Buffer.concat(chunks);
-      writeFileSync(installerPath, buffer);
-    }
+    await downloadInstaller(downloadUrl, installerPath);
 
     console.log(`[Update] Downloaded to ${installerPath}`);
   }

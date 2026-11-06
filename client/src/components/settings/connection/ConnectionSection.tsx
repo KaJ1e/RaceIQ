@@ -1,3 +1,4 @@
+import { normalizeMirrorUrl, validateMirrorUrl } from "@raceiq/frontend-pure/mirror-url";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,9 @@ export function ConnectionSection() {
   const [savedPort, setSavedPort] = useState<number | null>(null);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [mirrorUrl, setMirrorUrl] = useState<string | null>(null);
+  const [mirrorStatus, setMirrorStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [mirrorError, setMirrorError] = useState("");
 
   useEffect(() => {
     if (displaySettings.udpPort != null && savedPort === null) {
@@ -24,6 +28,29 @@ export function ConnectionSection() {
 
   const port = Number.parseInt(udpPort, 10);
   const hasChanges = savedPort === null || port !== savedPort;
+  const savedMirrorUrl = displaySettings.communityTunesUrl ?? "";
+  const mirrorValue = mirrorUrl ?? savedMirrorUrl;
+  const mirrorHasChanges = normalizeMirrorUrl(mirrorValue) !== savedMirrorUrl;
+
+  async function handleSaveMirror() {
+    const result = validateMirrorUrl(mirrorValue);
+    if (!result.ok) {
+      setMirrorStatus("error");
+      setMirrorError(m.settings_network_mirror_invalid());
+      return;
+    }
+    setMirrorStatus("saving");
+    setMirrorError("");
+    try {
+      await saveSettings.mutateAsync({ communityTunesUrl: result.value });
+      setMirrorUrl(result.value);
+      setMirrorStatus("saved");
+      setTimeout(() => setMirrorStatus("idle"), 2000);
+    } catch (err) {
+      setMirrorStatus("error");
+      setMirrorError(err instanceof Error ? err.message : m.label_failed_to_save());
+    }
+  }
 
   async function handleSave() {
     const savePort = Number.parseInt(udpPort, 10);
@@ -114,6 +141,41 @@ export function ConnectionSection() {
           <option value="15">15 fps</option>
         </select>
         <p className="text-app-text-muted text-xs mt-1">{m.settings_render_frame_cap_desc()}</p>
+      </div>
+      <div className="mt-6 pt-6 border-t border-app-border">
+        <h3 className="text-sm font-semibold text-app-text">{m.settings_network_mirror_title()}</h3>
+        <p className="text-sm text-app-text-muted mt-1 mb-3 max-w-lg">{m.settings_network_mirror_desc()}</p>
+        <div className="flex items-end gap-3 max-w-lg">
+          <div className="flex-1">
+            <Label htmlFor="community-tunes-url" className="text-app-text-secondary">
+              {m.settings_network_mirror_label()}
+            </Label>
+            <Input
+              id="community-tunes-url"
+              type="url"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              value={mirrorValue}
+              onChange={(e) => {
+                setMirrorUrl(e.target.value);
+                setMirrorStatus("idle");
+                setMirrorError("");
+              }}
+              onKeyDown={(e) => e.key === "Enter" && handleSaveMirror()}
+              className="border bg-app-surface-alt border-app-border-input text-app-text font-mono mt-1.5"
+              placeholder={m.settings_network_mirror_placeholder()}
+            />
+          </div>
+          <Button onClick={handleSaveMirror} disabled={mirrorStatus === "saving" || !mirrorHasChanges} variant={mirrorStatus === "saved" ? "secondary" : "default"} className="shrink-0">
+            {mirrorStatus === "saving" ? m.common_saving() : mirrorStatus === "saved" ? m.common_saved() : m.common_save()}
+          </Button>
+        </div>
+        {mirrorStatus === "error" && (
+          <p className="text-status-danger text-sm mt-2" role="alert">
+            {mirrorError}
+          </p>
+        )}
       </div>
       <div className="mt-6 pt-6 border-t border-app-border">
         <Button variant="app-ghost" size="app-sm" onClick={() => setShowSetupGuide(!showSetupGuide)}>

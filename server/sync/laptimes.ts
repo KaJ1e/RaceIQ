@@ -1,5 +1,10 @@
 import { z } from "zod";
 import type { GameId } from "@raceiq/shared/games/ids";
+import { loadSettings } from "../runtime/config/settings";
+import { recordOnlineFailure, recordOnlineSuccess } from "../runtime/network-health";
+import accSeed from "./seed/acc.json";
+import acEvoSeed from "./seed/ac-evo.json";
+import forzaSeed from "./seed/forza.json";
 
 /**
  * Community leaderboard CDN sync.
@@ -33,8 +38,27 @@ const MANIFEST_ENTRIES = Object.entries(MANIFEST_KEY_BY_GAME) as Array<
   [GameId, string]
 >;
 
+/**
+ * Reference leaderboards shipped with the app. They are only loaded when the
+ * first sync fails and the cache is empty, so a blocked network still shows the
+ * community lap-time lists instead of nothing. A successful sync replaces them.
+ */
+const SEED_BY_GAME: Partial<Record<GameId, unknown>> = {
+  acc: accSeed,
+  "ac-evo": acEvoSeed,
+  "fm-2023": forzaSeed,
+};
+const SEED_VERSION = "seed:2026-11-05";
+
 function baseUrl(): string {
-  return process.env.COMMUNITY_TUNES_URL ?? DEFAULT_BASE_URL;
+  if (process.env.COMMUNITY_TUNES_URL) return process.env.COMMUNITY_TUNES_URL;
+  try {
+    const configured = loadSettings().communityTunesUrl;
+    if (configured) return configured;
+  } catch {
+    // Unreadable settings must not break sync; fall through to the default.
+  }
+  return DEFAULT_BASE_URL;
 }
 
 const ManifestSchema = z.object({
@@ -81,9 +105,15 @@ function skippedResult(version: string | null): LaptimeSyncResult {
 }
 
 async function fetchManifest(): Promise<LaptimeManifest | null> {
-  const manifestRes = await fetch(resolveManifestUrl(baseUrl()));
+  const manifestRes = await fetch(resolveManifestUrl(baseUrl()), {
+    // A blocked or stalled mirror must not leave the sync pending forever.
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!manifestRes.ok) {
     console.warn(`[Laptimes] manifest fetch failed: HTTP ${manifestRes.status}`);
+    // A captive portal or a filtered mirror answers with an error instead of
+    // timing out; record it so the UI still reports online content unavailable.
+    recordOnlineFailure("laptimes", `manifest HTTP ${manifestRes.status}`);
     return null;
   }
   return ManifestSchema.parse(await manifestRes.json());
@@ -94,9 +124,10 @@ async function fetchGamePayload(
   path: string,
 ): Promise<{ value: unknown } | null> {
   const laptimesUrl = resolveLaptimeUrl(baseUrl(), path);
-  const res = await fetch(laptimesUrl);
+  const res = await fetch(laptimesUrl, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
     console.warn(`[Laptimes] ${manifestKey} fetch failed: HTTP ${res.status}; keeping cache`);
+    recordOnlineFailure("laptimes", `${manifestKey} HTTP ${res.status}`);
     return null;
   }
   return { value: await res.json() };
@@ -126,6 +157,24 @@ function parseLaptimeRows(manifestKey: string, raw: unknown): LaptimeEntry[] | n
 }
 
 /**
+ * Load the bundled reference leaderboards. First run only: once a real sync has
+ * populated the cache, the snapshot is never reloaded for this process.
+ */
+function applySeedLaptimes(): LaptimeSyncResult {
+  let total = 0;
+  for (const [gameId, raw] of Object.entries(SEED_BY_GAME) as Array<[GameId, unknown]>) {
+    const rows = parseLaptimeRows(MANIFEST_KEY_BY_GAME[gameId] ?? gameId, raw);
+    if (!rows || rows.length === 0) continue;
+    cache.set(gameId, rows);
+    total += rows.length;
+  }
+  if (total === 0) return skippedResult(cachedVersion);
+  cachedVersion = SEED_VERSION;
+  console.log(`[Laptimes] offline: loaded bundled snapshot (${total} entries, ${SEED_VERSION})`);
+  return { synced: false, count: total, version: SEED_VERSION };
+}
+
+/**
  * Run one sync pass across every game the CDN publishes leaderboards for.
  * Skips re-fetching when the manifest version is unchanged, unless `force`
  * is set. Per-game failures are isolated: a bad payload for one game keeps
@@ -141,6 +190,7 @@ export async function syncLaptimes(
   try {
     const manifest = await fetchManifest();
     if (!manifest) {
+      if (cache.size === 0) return applySeedLaptimes();
       return skippedResult(cachedVersion);
     }
 
@@ -171,12 +221,15 @@ export async function syncLaptimes(
       console.log(`[Laptimes] synced ${rows.length} entry(ies) for ${gameId}`);
     }
 
+    recordOnlineSuccess("laptimes");
     cachedVersion = manifest.version;
     console.log(
       `[Laptimes] sync complete: ${total} total entry(ies) at version ${manifest.version}`,
     );
     return { synced: true, count: total, version: manifest.version };
   } catch (err) {
+    recordOnlineFailure("laptimes", err instanceof Error ? err.message : String(err));
+    if (cache.size === 0) return applySeedLaptimes();
     console.warn("[Laptimes] sync failed; keeping existing cache:", err instanceof Error ? err.message : err);
     return skippedResult(cachedVersion);
   } finally {

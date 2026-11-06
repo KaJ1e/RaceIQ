@@ -92,7 +92,14 @@ export function AnalysisResultCard({
           </Button>
         </div>
       )}
-      {hasResult && children}
+      {hasResult && (
+        <>
+          <Badge variant="neutral" className="mb-1.5 text-app-micro font-normal text-app-text-muted">
+            {m.ai_generated_badge()}
+          </Badge>
+          {children}
+        </>
+      )}
     </div>
   );
 }

@@ -143,6 +143,7 @@
     "./runtime/config/paths": "./runtime/config/paths.ts",
     "./runtime/config/release-features": "./runtime/config/release-features.ts",
     "./runtime/config/settings": "./runtime/config/settings.ts",
+    "./runtime/network-health": "./runtime/network-health.ts",
     "./runtime/desktop": "./runtime/desktop.ts",
     "./runtime/diagnostic-log-store": "./runtime/diagnostic-log-store.ts",
     "./runtime/logger": "./runtime/logger.ts",

@@ -2966,5 +2966,17 @@
   "recording_processing_failed": "Ошибка обработки: {error}",
   "recording_processing_refresh": "Обновить статус",
   "opponent_recording_failed": "Не удалось записать соперника: {error}",
-  "opponent_recording_dismiss": "Закрыть"
+  "opponent_recording_dismiss": "Закрыть",
+  "ai_generated_badge": "Сгенерировано ИИ · только для справки",
+  "ai_data_flow_note": "Запросы отправляются выбранному поставщику моделей. Файлы телеметрии остаются на этом компьютере.",
+  "network_unavailable_banner": "Онлайн-контент недоступен — показаны локальные данные.",
+  "ai_error_network": "Не удаётся связаться с провайдером ИИ. Проверьте сеть или прокси и повторите попытку.",
+  "ai_error_timeout": "Провайдер ИИ слишком долго не отвечал. Повторите попытку.",
+  "video_embed_unavailable": "Видео не загрузилось. Возможно, сеть работает плохо или YouTube недоступен в вашем регионе.",
+  "video_embed_open": "Открыть на YouTube",
+  "settings_network_mirror_title": "Зеркало данных сообщества",
+  "settings_network_mirror_desc": "Загружайте настройки и времена круга сообщества через зеркало, доступное из вашей сети. Оставьте поле пустым, чтобы использовать встроенный узел. Переменная среды COMMUNITY_TUNES_URL имеет приоритет над этой настройкой.",
+  "settings_network_mirror_label": "URL зеркала",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "Введите URL http(s) или оставьте поле пустым."
 }

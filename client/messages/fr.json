@@ -2966,5 +2966,17 @@
   "recording_processing_failed": "Échec du traitement : {error}",
   "recording_processing_refresh": "Actualiser le statut",
   "opponent_recording_failed": "Échec de l’enregistrement de l’adversaire : {error}",
-  "opponent_recording_dismiss": "Fermer"
+  "opponent_recording_dismiss": "Fermer",
+  "ai_generated_badge": "Généré par IA · à titre indicatif",
+  "ai_data_flow_note": "Les prompts sont envoyés au fournisseur de modèles choisi. Les fichiers de télémétrie restent sur cet ordinateur.",
+  "network_unavailable_banner": "Contenu en ligne indisponible — données locales affichées.",
+  "ai_error_network": "Impossible de joindre le fournisseur d'IA. Vérifiez votre réseau ou le proxy, puis réessayez.",
+  "ai_error_timeout": "Le fournisseur d'IA a mis trop de temps à répondre. Réessayez.",
+  "video_embed_unavailable": "La vidéo n'a pas été chargée. Le réseau est peut-être mauvais ou YouTube indisponible dans votre région.",
+  "video_embed_open": "Ouvrir sur YouTube",
+  "settings_network_mirror_title": "Miroir des données communautaires",
+  "settings_network_mirror_desc": "Téléchargez les réglages et les temps au tour de la communauté via un miroir accessible depuis votre réseau. Laissez vide pour utiliser l'hôte intégré. La variable d'environnement COMMUNITY_TUNES_URL est prioritaire sur ce réglage.",
+  "settings_network_mirror_label": "URL du miroir",
+  "settings_network_mirror_placeholder": "https://miroir.example.com/raceiq",
+  "settings_network_mirror_invalid": "Saisissez une URL http(s) ou laissez le champ vide."
 }

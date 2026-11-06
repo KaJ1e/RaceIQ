@@ -9,7 +9,10 @@
     "./iracing-car-sort": "./src/iracing-car-sort.ts",
     "./pi-class": "./src/pi-class.ts",
     "./utc-date": "./src/utc-date.ts",
-    "./route-search": "./src/route-search.ts"
+    "./route-search": "./src/route-search.ts",
+    "./ai-error": "./src/ai-error.ts",
+    "./mirror-url": "./src/mirror-url.ts",
+    "./video-embed": "./src/video-embed.ts"
   },
   "scripts": {
     "lint": "node ../../client/node_modules/oxlint/bin/oxlint .",

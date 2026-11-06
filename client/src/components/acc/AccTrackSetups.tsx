@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { detectPlatform, PLATFORM_LABEL, PlatformIcon } from "@/components/acc/acc-links";
+import { LazyYouTube } from "@/components/LazyYouTube";
 import { m } from "@/paraglide/messages";
 import { client } from "../../lib/rpc";
 import { Button } from "../ui/button";
@@ -36,6 +37,9 @@ interface AccCar {
   class: string;
 }
 
+/** YouTube metadata is decorative: bound the request rather than block on it. */
+const YT_META_CLIENT_TIMEOUT_MS = 8_000;
+
 function extractYouTubeId(url: string): string | null {
   try {
     const u = new URL(url);
@@ -55,14 +59,14 @@ function SetupVideo({ url }: { url: string }) {
     const vid = u.hostname.includes("youtube.com") ? u.searchParams.get("v") : u.hostname === "youtu.be" ? u.pathname.slice(1) : null;
     if (!vid) return null;
     return (
-      <Card className="rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <iframe
-          src={`https://www.youtube.com/embed/${vid}`}
-          title={m.f1setup_hotlap()}
-          className="w-full aspect-video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+      <Card className="overflow-hidden rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
+        <div className="relative w-full aspect-video">
+          <LazyYouTube
+            src={`https://www.youtube.com/embed/${vid}`}
+            title={m.f1setup_hotlap()}
+            className="absolute inset-0"
+          />
+        </div>
       </Card>
     );
   } catch {
@@ -134,15 +138,24 @@ export function AccTrackSetups({ trackId }: { trackId: string }) {
       const cacheKey = `yt-meta:${ytVideoId}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) return JSON.parse(cached) as { uploadDate: string; downloadUrl: string };
-      const res = await fetch(`/api/acc/yt-meta?videoId=${ytVideoId}`);
+      // The server caps its own YouTube lookup at 5 s; this deadline covers the
+      // same-origin hop so a stalled route can never hold the panel open.
+      const res = await fetch(`/api/acc/yt-meta?videoId=${ytVideoId}`, {
+        signal: AbortSignal.timeout(YT_META_CLIENT_TIMEOUT_MS),
+      });
       if (!res.ok) return null;
       const data = (await res.json()) as { uploadDate: string; downloadUrl: string };
-      localStorage.setItem(cacheKey, JSON.stringify(data));
+      // Only remember metadata that actually resolved: an empty reply means
+      // YouTube was unreachable, and pinning that in localStorage would hide the
+      // link forever once the network recovers.
+      if (data.uploadDate || data.downloadUrl) localStorage.setItem(cacheKey, JSON.stringify(data));
       return data;
     },
     enabled: !!ytVideoId,
     staleTime: Infinity,
     gcTime: Infinity,
+    // Best-effort metadata for one row: retrying only re-pays the deadline.
+    retry: false,
   });
 
   // Merge YouTube metadata into the selected setup
@@ -358,13 +371,13 @@ export function AccTrackGuide({ trackId, trackName }: { trackId: string; trackNa
   return (
     <div className="flex items-start justify-center h-full p-4">
       <Card className="w-full max-w-4xl rounded-lg border-0 bg-transparent p-0 ring-app-border/20">
-        <iframe
-          src={embedUrl}
-          title={`${trackName} ${m.f1setup_track_guide()}`}
-          className="w-full aspect-video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="relative w-full aspect-video">
+          <LazyYouTube
+            src={embedUrl}
+            title={`${trackName} ${m.f1setup_track_guide()}`}
+            className="absolute inset-0"
+          />
+        </div>
       </Card>
     </div>
   );

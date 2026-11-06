@@ -2966,5 +2966,17 @@
   "recording_processing_failed": "Falha no processamento: {error}",
   "recording_processing_refresh": "Atualizar estado",
   "opponent_recording_failed": "Falha na gravação do adversário: {error}",
-  "opponent_recording_dismiss": "Fechar"
+  "opponent_recording_dismiss": "Fechar",
+  "ai_generated_badge": "Gerado por IA · apenas para referência",
+  "ai_data_flow_note": "Os prompts são enviados para o fornecedor de modelos escolhido. Os ficheiros de telemetria ficam neste computador.",
+  "network_unavailable_banner": "Conteúdo online indisponível — a mostrar dados locais.",
+  "ai_error_network": "Não foi possível contactar o fornecedor de IA. Verifique a rede ou o proxy e tente novamente.",
+  "ai_error_timeout": "O fornecedor de IA demorou demasiado a responder. Tente novamente.",
+  "video_embed_unavailable": "O vídeo não carregou. A rede pode estar fraca ou o YouTube pode não estar disponível na sua região.",
+  "video_embed_open": "Abrir no YouTube",
+  "settings_network_mirror_title": "Espelho de dados da comunidade",
+  "settings_network_mirror_desc": "Transfira afinações e tempos por volta da comunidade através de um espelho acessível na sua rede. Deixe vazio para usar o servidor integrado. A variável de ambiente COMMUNITY_TUNES_URL tem prioridade sobre esta definição.",
+  "settings_network_mirror_label": "URL do espelho",
+  "settings_network_mirror_placeholder": "https://espelho.example.com/raceiq",
+  "settings_network_mirror_invalid": "Introduza um URL http(s) ou deixe o campo vazio."
 }

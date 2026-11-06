@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { LazyYouTube } from "@/components/LazyYouTube";
 import { SessionTypeBadge } from "@/components/SessionTypeBadge";
 import { ProviderBadge } from "@/components/f1/f125/ProviderBadge";
 import { F125SetupRanges } from "@/components/f1/f125/SetupRanges";
@@ -18,13 +19,13 @@ function SetupVideo({ url }: { url: string }) {
   if (!vid) return null;
   return (
     <div className="rounded-lg overflow-hidden border border-app-border/20">
-      <iframe
-        src={`https://www.youtube.com/embed/${vid}`}
-        title={m.f1setup_hotlap()}
-        className="w-full aspect-video"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+      <div className="relative w-full aspect-video">
+        <LazyYouTube
+          src={`https://www.youtube.com/embed/${vid}`}
+          title={m.f1setup_hotlap()}
+          className="absolute inset-0"
+        />
+      </div>
     </div>
   );
 }

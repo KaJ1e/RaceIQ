@@ -2967,5 +2967,17 @@
   "recording_processing_failed": "प्रोसेसिंग विफल: {error}",
   "recording_processing_refresh": "स्थिति रीफ़्रेश करें",
   "opponent_recording_failed": "प्रतिद्वंद्वी की रिकॉर्डिंग विफल: {error}",
-  "opponent_recording_dismiss": "बंद करें"
+  "opponent_recording_dismiss": "बंद करें",
+  "ai_generated_badge": "AI द्वारा निर्मित · केवल संदर्भ हेतु",
+  "ai_data_flow_note": "प्रॉम्प्ट आपके चुने हुए मॉडल प्रदाता को भेजे जाते हैं। टेलीमेट्री फ़ाइलें इस कंप्यूटर पर ही रहती हैं।",
+  "network_unavailable_banner": "ऑनलाइन सामग्री उपलब्ध नहीं है — स्थानीय डेटा दिखाया जा रहा है।",
+  "ai_error_network": "AI प्रदाता से कनेक्ट नहीं हो सका। अपना नेटवर्क या प्रॉक्सी जाँचें और फिर से कोशिश करें।",
+  "ai_error_timeout": "AI प्रदाता ने बहुत देर तक जवाब नहीं दिया। फिर से कोशिश करें।",
+  "video_embed_unavailable": "वीडियो लोड नहीं हुआ। नेटवर्क खराब हो सकता है या आपके क्षेत्र में YouTube उपलब्ध नहीं हो सकता।",
+  "video_embed_open": "YouTube पर खोलें",
+  "settings_network_mirror_title": "कम्युनिटी डेटा मिरर",
+  "settings_network_mirror_desc": "कम्युनिटी सेटअप और लैप टाइम ऐसे मिरर से लोड करें जो आपके नेटवर्क से उपलब्ध हो। बिल्ट-इन होस्ट इस्तेमाल करने के लिए खाली छोड़ें। एनवायरनमेंट वैरिएबल COMMUNITY_TUNES_URL इस सेटिंग को ओवरराइड करता है।",
+  "settings_network_mirror_label": "मिरर URL",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "कोई http(s) URL डालें, या फ़ील्ड खाली छोड़ें।"
 }

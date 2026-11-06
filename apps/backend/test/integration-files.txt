@@ -114,6 +114,8 @@ apps/backend/test/runtime/http-access-compiled.test.ts
 apps/backend/test/runtime/native-sources.test.ts
 apps/backend/test/runtime/release-feature-flags.test.ts
 apps/backend/test/runtime/runtime-options.test.ts
+apps/backend/test/runtime/network-health.test.ts
+apps/backend/test/runtime/community-mirror-url.test.ts
 apps/backend/test/runtime/settings.test.ts
 apps/backend/test/runtime/source-supervisor.test.ts
 apps/backend/test/runtime/stale-session-jobs.test.ts

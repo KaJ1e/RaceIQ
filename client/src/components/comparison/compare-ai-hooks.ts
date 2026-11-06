@@ -1,5 +1,7 @@
+import { classifyAiError } from "@raceiq/frontend-pure/ai-error";
 import { useCallback, useEffect, useState } from "react";
 import { useSettings } from "@/hooks/settings";
+import { friendlyAiErrorMessage } from "@/lib/ai-error";
 import { type ChatStreamError, readChatStream } from "@/lib/chat-stream";
 import { isAiAnalysisConfigured, launchAiFeature } from "@/lib/is-ai-configured";
 import { authenticatedFetch, client } from "@/lib/rpc";
@@ -7,6 +9,7 @@ import { m } from "@/paraglide/messages";
 import { type AnalysisSummary, type InputsAnalysis, summarize } from "./compare-ai-types";
 
 function formatAnalysisStreamError(event: ChatStreamError): string {
+  if (classifyAiError(event.message)) return friendlyAiErrorMessage(event.message);
   const statusCode = typeof event.statusCode === "number" ? event.statusCode : event.upstream?.code;
   const status = event.upstream?.status;
   return `${event.message}${statusCode || status ? ` (${statusCode ?? "error"}${status ? ` ${status}` : ""})` : ""}`;
@@ -59,7 +62,7 @@ export function useLapAnalysis(lapId: number, panelOpen: boolean) {
           if (!resolved) throw new Error(m.compare_analyse_failed());
         } else {
           const data = (await res.json()) as { analysis: string | object | null; error?: string };
-          if (data.error || !data.analysis) throw new Error(data.error || m.compare_analyse_failed());
+          if (data.error || !data.analysis) throw new Error(friendlyAiErrorMessage(data.error ?? "") || m.compare_analyse_failed());
           const parsed = typeof data.analysis === "string" ? JSON.parse(data.analysis) : data.analysis;
           setSummary(summarize(parsed));
         }

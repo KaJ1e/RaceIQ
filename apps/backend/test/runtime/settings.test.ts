@@ -63,6 +63,16 @@ describe("settings with unit system", () => {
     expect(PartialSettingsSchema.safeParse({hudHostname: "http://pc.ts.net"}).success).toBe(false);
   });
 
+  test("stores a community tunes mirror and strips a trailing slash", () => {
+    const before = loadSettings();
+    saveSettings({ ...before, communityTunesUrl: " https://mirror.example.com/tunes/ " });
+    expect(loadSettings().communityTunesUrl).toBe("https://mirror.example.com/tunes");
+    saveSettings({ ...loadSettings(), communityTunesUrl: "" });
+    expect(loadSettings().communityTunesUrl).toBe("");
+    expect(PartialSettingsSchema.safeParse({ communityTunesUrl: "ftp://mirror.example.com" }).success).toBe(false);
+    expect(PartialSettingsSchema.safeParse({ communityTunesUrl: "not a url" }).success).toBe(false);
+  });
+
   test("loadSettings returns defaults when file has only udpPort (migration)", () => {
     if (!existsSync(SETTINGS_DIR)) mkdirSync(SETTINGS_DIR, { recursive: true });
     writeFileSync(SETTINGS_PATH, JSON.stringify({ udpPort: 5300 }));
@@ -149,6 +159,77 @@ describe("settings with unit system", () => {
     expect(settings.localEndpoint).toBe("https://openrouter.ai/api/v1");
   });
 });
+
+describe("community tunes mirror through PUT /api/settings", () => {
+  let originalContent: string | null = null;
+
+  beforeEach(() => {
+    originalContent = existsSync(SETTINGS_PATH) ? readFileSync(SETTINGS_PATH, "utf-8") : null;
+  });
+
+  afterEach(() => {
+    rmSync(`${SETTINGS_PATH}.tmp`, { recursive: true, force: true });
+    if (originalContent === null) rmSync(SETTINGS_PATH, { force: true });
+    else writeFileSync(SETTINGS_PATH, originalContent);
+  });
+
+  function putSettings(body: unknown) {
+    return settingsRoutes.request("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  function storedSettings(): Record<string, unknown> {
+    return JSON.parse(readFileSync(SETTINGS_PATH, "utf-8")) as Record<string, unknown>;
+  }
+
+  test("saves a trailing-slash mirror normalized, and loadSettings agrees", async () => {
+    const response = await putSettings({ communityTunesUrl: "https://mirror.example.com/tunes/" });
+    expect(response.status).toBe(200);
+    const body = await response.json() as { communityTunesUrl?: string };
+    expect(body.communityTunesUrl).toBe("https://mirror.example.com/tunes");
+    expect(storedSettings().communityTunesUrl).toBe("https://mirror.example.com/tunes");
+    expect(loadSettings().communityTunesUrl).toBe("https://mirror.example.com/tunes");
+  });
+
+  test("accepts an uppercase scheme and stores it exactly as sent", async () => {
+    const response = await putSettings({ communityTunesUrl: "HTTPS://Mirror.Example.com" });
+    expect(response.status).toBe(200);
+    const body = await response.json() as { communityTunesUrl?: string };
+    expect(body.communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+    expect(storedSettings().communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+    expect(loadSettings().communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+  });
+
+  test("rejects a mirror that only looks like a URL before normalisation", async () => {
+    saveSettings({ ...loadSettings(), communityTunesUrl: "https://kept.example.com/tunes" });
+    const before = readFileSync(SETTINGS_PATH, "utf-8");
+    const response = await putSettings({ communityTunesUrl: "https://///" });
+    expect(response.status).toBe(400);
+    expect(readFileSync(SETTINGS_PATH, "utf-8")).toBe(before);
+    expect(loadSettings().communityTunesUrl).toBe("https://kept.example.com/tunes");
+  });
+
+  test("rejects a non-http mirror without touching the stored override", async () => {
+    saveSettings({ ...loadSettings(), communityTunesUrl: "https://kept.example.com/tunes" });
+    const before = readFileSync(SETTINGS_PATH, "utf-8");
+    const response = await putSettings({ communityTunesUrl: "ftp://mirror.example.com" });
+    expect(response.status).toBe(400);
+    expect(readFileSync(SETTINGS_PATH, "utf-8")).toBe(before);
+    expect(loadSettings().communityTunesUrl).toBe("https://kept.example.com/tunes");
+  });
+
+  test("an empty mirror clears the override", async () => {
+    saveSettings({ ...loadSettings(), communityTunesUrl: "https://mirror.example.com/tunes" });
+    const response = await putSettings({ communityTunesUrl: "" });
+    expect(response.status).toBe(200);
+    expect(storedSettings().communityTunesUrl).toBe("");
+    expect(loadSettings().communityTunesUrl).toBe("");
+  });
+});
+
 describe("driver profile output budget", () => {
   let originalContent: string | null = null;
 

@@ -2966,5 +2966,17 @@
   "recording_processing_failed": "Помилка обробки: {error}",
   "recording_processing_refresh": "Оновити стан",
   "opponent_recording_failed": "Не вдалося записати суперника: {error}",
-  "opponent_recording_dismiss": "Закрити"
+  "opponent_recording_dismiss": "Закрити",
+  "ai_generated_badge": "Згенеровано ШІ · лише для довідки",
+  "ai_data_flow_note": "Запити надсилаються обраному постачальнику моделей. Файли телеметрії залишаються на цьому комп’ютері.",
+  "network_unavailable_banner": "Онлайн-вміст недоступний — показано локальні дані.",
+  "ai_error_network": "Не вдається зв'язатися з постачальником ШІ. Перевірте мережу або проксі та спробуйте ще раз.",
+  "ai_error_timeout": "Постачальник ШІ надто довго не відповідав. Спробуйте ще раз.",
+  "video_embed_unavailable": "Відео не завантажилося. Можливо, мережа працює погано або YouTube недоступний у вашому регіоні.",
+  "video_embed_open": "Відкрити на YouTube",
+  "settings_network_mirror_title": "Дзеркало даних спільноти",
+  "settings_network_mirror_desc": "Завантажуйте налаштування та часи кіл спільноти через дзеркало, доступне з вашої мережі. Залиште поле порожнім, щоб використовувати вбудований вузол. Змінна середовища COMMUNITY_TUNES_URL має пріоритет над цим налаштуванням.",
+  "settings_network_mirror_label": "URL дзеркала",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "Введіть URL http(s) або залиште поле порожнім."
 }

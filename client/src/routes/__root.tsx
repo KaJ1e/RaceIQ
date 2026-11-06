@@ -5,6 +5,7 @@ import { getAllGames } from "@raceiq/shared/games/registry"
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRoute, ErrorComponent, Link, Outlet, redirect, useLocation, useRouter } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
+import { NetworkUnavailableBanner } from "@/components/NetworkUnavailableBanner";
 import { OnboardingModal } from "@/components/onboarding/OnboardingModal";
 import { Settings } from "@/components/settings/Settings";
 import { DashboardAuthUnavailable, loadDashboardAuth } from "@/lib/dashboard-auth";
@@ -167,6 +168,7 @@ function AppShell() {
               <Menu className="size-6" />
             </Button>
           </header>
+          <NetworkUnavailableBanner />
           <main className="min-h-0 min-w-0 flex-1 overflow-hidden">
             <ResponsiveWorkspace>
               <Outlet key={uiLocale} />

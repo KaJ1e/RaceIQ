@@ -2966,5 +2966,17 @@
   "recording_processing_failed": "处理失败：{error}",
   "recording_processing_refresh": "刷新状态",
   "opponent_recording_failed": "对手录制失败：{error}",
-  "opponent_recording_dismiss": "关闭"
+  "opponent_recording_dismiss": "关闭",
+  "ai_generated_badge": "AI 生成 · 仅供参考",
+  "ai_data_flow_note": "提示词会发送给你选择的模型服务商；遥测文件本身不会上传。",
+  "network_unavailable_banner": "在线内容不可用，已使用本地数据。",
+  "ai_error_network": "无法连接 AI 服务商。请检查网络或代理后重试。",
+  "ai_error_timeout": "AI 服务商响应超时，请重试。",
+  "video_embed_unavailable": "视频加载失败：网络不佳，或该地区无法使用 YouTube。",
+  "video_embed_open": "在 YouTube 中打开",
+  "settings_network_mirror_title": "社区数据镜像",
+  "settings_network_mirror_desc": "通过可访问的镜像下载社区调校和圈速数据。留空则使用内置地址。环境变量 COMMUNITY_TUNES_URL 的优先级高于此设置。",
+  "settings_network_mirror_label": "镜像地址",
+  "settings_network_mirror_placeholder": "https://mirror.example.com/raceiq",
+  "settings_network_mirror_invalid": "请输入 http(s) 网址，或留空。"
 }

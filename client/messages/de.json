@@ -2970,5 +2970,17 @@
   "recording_processing_failed": "Verarbeitung fehlgeschlagen: {error}",
   "recording_processing_refresh": "Status aktualisieren",
   "opponent_recording_failed": "Aufzeichnung des Gegners fehlgeschlagen: {error}",
-  "opponent_recording_dismiss": "Schließen"
+  "opponent_recording_dismiss": "Schließen",
+  "ai_generated_badge": "KI-generiert · nur zur Orientierung",
+  "ai_data_flow_note": "Prompts werden an den gewählten Modellanbieter gesendet. Telemetriedateien bleiben auf diesem Computer.",
+  "network_unavailable_banner": "Online-Inhalte nicht erreichbar — lokale Daten werden angezeigt.",
+  "ai_error_network": "Der KI-Anbieter ist nicht erreichbar. Prüfe dein Netzwerk oder den Proxy und versuche es erneut.",
+  "ai_error_timeout": "Der KI-Anbieter hat zu lange nicht geantwortet. Versuche es erneut.",
+  "video_embed_unavailable": "Das Video wurde nicht geladen. Das Netzwerk ist möglicherweise schlecht oder YouTube in deiner Region nicht verfügbar.",
+  "video_embed_open": "Auf YouTube öffnen",
+  "settings_network_mirror_title": "Spiegel für Community-Daten",
+  "settings_network_mirror_desc": "Lade Community-Setups und Rundenzeiten über einen Spiegel, den dein Netzwerk erreicht. Leer lassen, um den eingebauten Host zu verwenden. Die Umgebungsvariable COMMUNITY_TUNES_URL überschreibt diese Einstellung.",
+  "settings_network_mirror_label": "Spiegel-URL",
+  "settings_network_mirror_placeholder": "https://spiegel.example.com/raceiq",
+  "settings_network_mirror_invalid": "Gib eine http(s)-URL ein oder lass das Feld leer."
 }
