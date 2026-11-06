@@ -1,16 +1,17 @@
 # Restricted and mainland-China networks
 
 RaceIQ is local-first: telemetry capture, storage, replay, analysis and the
-charts run on the machine. Only five things ever leave the computer, and each
+charts run on the machine. Only six things ever leave the computer, and each
 one degrades without breaking the app.
 
 | Surface | Host | Behaviour when unreachable |
 | --- | --- | --- |
 | AI provider | the provider the user picked (DeepSeek is reachable without a proxy) | a request that cannot reach the provider says so in plain language; answers the provider itself returned are shown as written; DeepSeek stays the recommended choice |
-| Update check | `api.github.com` | 5 s timeout, silent, banner reports online content unavailable |
+| Update check | `api.github.com`, then `github.com` for the installer | 5 s timeout on the release list, silent, banner reports online content unavailable; the installer download gets 15 s to connect and stops after 15 s with no data, reporting a stalled download instead of waiting forever |
 | Community tunes | `speedhq-tunes.pages.dev` | 10 s timeout; first run loads the bundled snapshot (171 tunes), later runs keep the last sync |
 | Lap-time reference | `speedhq-tunes.pages.dev` | 10 s timeout; first run loads the bundled snapshot (4,784 entries), later runs keep the cache |
 | Track guide videos | `www.youtube.com` | embeds load only after a click, so a blocked host never stalls a page; a clicked embed gets 8 s to connect, then says the network may be poor or the video unavailable in the region, with a retry and a link out to YouTube |
+| ACC setup video details | `www.youtube.com` | 5 s deadline; a failed lookup answers with empty details, cached for 10 minutes and never saved by the browser, so a setup panel opens on its own data and a video description that cannot be fetched is simply absent |
 
 ## What "offline" looks like
 
