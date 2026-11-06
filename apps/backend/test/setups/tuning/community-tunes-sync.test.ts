@@ -61,6 +61,15 @@ function stubFetch(routes: Record<string, { ok: boolean; body?: unknown }>) {
 const realFetch = globalThis.fetch;
 let savedSettings: string | null = null;
 
+/** Ensure the next sync counts as a first run, so it may fall back to the seed. */
+function clearStoredVersion(): void {
+  const current = existsSync(SETTINGS_PATH)
+    ? (JSON.parse(readFileSync(SETTINGS_PATH, "utf-8")) as Record<string, unknown>)
+    : {};
+  current.communityTunesVersion = null;
+  writeFileSync(SETTINGS_PATH, JSON.stringify(current));
+}
+
 beforeEach(async () => {
   await db.delete(communityTunes).run();
   savedSettings = existsSync(SETTINGS_PATH) ? readFileSync(SETTINGS_PATH, "utf-8") : null;
@@ -167,6 +176,22 @@ describe("syncCommunityTunes", () => {
     expect(result.count).toBe(1);
     const row = await getCommunityTuneById("community-legacy");
     expect(row).toMatchObject({ carId: "2860", trackId: "14" });
+  });
+
+  test("first sync failure loads the bundled offline snapshot", async () => {
+    clearStoredVersion();
+    globalThis.fetch = (() =>
+      Promise.reject(new Error("offline"))) as unknown as typeof fetch;
+
+    const result = await syncCommunityTunes();
+
+    expect(result).toEqual({ synced: false, count: 171, version: "seed:2026-11-05" });
+    expect((await getCommunityTunes("fm-2023")).length).toBe(171);
+    expect(await getCommunityTuneById("community-1380866448448290816")).toMatchObject({
+      name: "Porsche 911 GT3 R — aradenox",
+      carId: "3951",
+      trackId: null,
+    });
   });
 
   test("tunes fetch failure keeps existing cache", async () => {

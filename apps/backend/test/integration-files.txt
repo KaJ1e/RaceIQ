@@ -172,6 +172,7 @@ apps/backend/test/setups/tuning/tune-rules-f1.test.ts
 apps/backend/test/setups/tuning/tune-rules.test.ts
 apps/backend/test/setups/tuning/tune-symptoms.test.ts
 apps/backend/test/sync/laptimes-lazy.test.ts
+apps/backend/test/sync/seed-snapshots.test.ts
 apps/backend/test/telemetry/analysis-metric-values.test.ts
 apps/backend/test/telemetry/analysis-telemetry.test.ts
 apps/backend/test/telemetry/bin-fixture-detection.test.ts
