@@ -2972,7 +2972,7 @@
   "network_unavailable_banner": "Contenuti online non disponibili: vengono mostrati i dati locali.",
   "ai_error_network": "Impossibile raggiungere il provider di IA. Controlla la rete o il proxy e riprova.",
   "ai_error_timeout": "Il provider di IA ha impiegato troppo tempo a rispondere. Riprova.",
-  "video_embed_unavailable": "Il video non è stato caricato. YouTube potrebbe essere bloccato su questa rete.",
+  "video_embed_unavailable": "Il video non è stato caricato. La rete potrebbe essere lenta o YouTube non disponibile nella tua regione.",
   "video_embed_open": "Apri su YouTube",
   "settings_network_mirror_title": "Mirror dei dati della community",
   "settings_network_mirror_desc": "Scarica assetti e tempi sul giro della community tramite un mirror raggiungibile dalla tua rete. Lascia vuoto per usare l'host integrato. La variabile d'ambiente COMMUNITY_TUNES_URL ha la precedenza su questa impostazione.",

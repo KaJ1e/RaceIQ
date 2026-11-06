@@ -2973,7 +2973,7 @@
   "network_unavailable_banner": "온라인 콘텐츠를 사용할 수 없어 로컬 데이터를 표시합니다.",
   "ai_error_network": "AI 제공자에 연결할 수 없습니다. 네트워크 또는 프록시를 확인한 후 다시 시도하세요.",
   "ai_error_timeout": "AI 제공자의 응답이 너무 늦습니다. 다시 시도하세요.",
-  "video_embed_unavailable": "동영상을 불러오지 못했습니다. 이 네트워크에서 YouTube가 차단되었을 수 있습니다.",
+  "video_embed_unavailable": "동영상을 불러오지 못했습니다. 네트워크가 느리거나 해당 지역에서 YouTube를 사용할 수 없을 수 있습니다.",
   "video_embed_open": "YouTube에서 열기",
   "settings_network_mirror_title": "커뮤니티 데이터 미러",
   "settings_network_mirror_desc": "커뮤니티 세팅과 랩 타임을 이 네트워크에서 접근할 수 있는 미러로 내려받습니다. 비워 두면 내장 호스트를 사용합니다. 환경 변수 COMMUNITY_TUNES_URL이 이 설정보다 우선합니다.",

@@ -6,11 +6,11 @@ one degrades without breaking the app.
 
 | Surface | Host | Behaviour when unreachable |
 | --- | --- | --- |
-| AI provider | the provider the user picked (DeepSeek is reachable without a proxy) | request fails with the provider's error; DeepSeek stays the recommended choice |
+| AI provider | the provider the user picked (DeepSeek is reachable without a proxy) | a request that cannot reach the provider says so in plain language; answers the provider itself returned are shown as written; DeepSeek stays the recommended choice |
 | Update check | `api.github.com` | 5 s timeout, silent, banner reports online content unavailable |
 | Community tunes | `speedhq-tunes.pages.dev` | 10 s timeout; first run loads the bundled snapshot (171 tunes), later runs keep the last sync |
 | Lap-time reference | `speedhq-tunes.pages.dev` | 10 s timeout; first run loads the bundled snapshot (4,784 entries), later runs keep the cache |
-| Track guide videos | `www.youtube.com` | embeds load only after a click, so a blocked host never stalls a page; an embed that stays blank says so and links out to YouTube |
+| Track guide videos | `www.youtube.com` | embeds load only after a click, so a blocked host never stalls a page; a clicked embed gets 8 s to connect, then says the network may be poor or the video unavailable in the region, with a retry and a link out to YouTube |
 
 ## What "offline" looks like
 

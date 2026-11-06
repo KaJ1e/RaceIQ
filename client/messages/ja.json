@@ -2972,7 +2972,7 @@
   "network_unavailable_banner": "オンラインコンテンツを取得できません。ローカルデータを表示しています。",
   "ai_error_network": "AI プロバイダーに接続できません。ネットワークまたはプロキシを確認して、もう一度お試しください。",
   "ai_error_timeout": "AI プロバイダーの応答がタイムアウトしました。もう一度お試しください。",
-  "video_embed_unavailable": "動画を読み込めませんでした。このネットワークでは YouTube がブロックされている可能性があります。",
+  "video_embed_unavailable": "動画を読み込めませんでした。ネットワークが不安定か、お住まいの地域で YouTube が利用できない可能性があります。",
   "video_embed_open": "YouTube で開く",
   "settings_network_mirror_title": "コミュニティデータのミラー",
   "settings_network_mirror_desc": "コミュニティのセットアップとラップタイムを、このネットワークから到達できるミラー経由で取得します。空欄の場合は組み込みのホストを使用します。環境変数 COMMUNITY_TUNES_URL がこの設定より優先されます。",

@@ -2972,7 +2972,7 @@
   "network_unavailable_banner": "Treści online są niedostępne — wyświetlane są dane lokalne.",
   "ai_error_network": "Nie można połączyć się z dostawcą AI. Sprawdź sieć lub proxy i spróbuj ponownie.",
   "ai_error_timeout": "Dostawca AI zbyt długo nie odpowiadał. Spróbuj ponownie.",
-  "video_embed_unavailable": "Nie udało się wczytać filmu. YouTube może być zablokowany w tej sieci.",
+  "video_embed_unavailable": "Nie udało się wczytać filmu. Sieć może być słaba lub YouTube niedostępny w Twoim regionie.",
   "video_embed_open": "Otwórz w YouTube",
   "settings_network_mirror_title": "Serwer lustrzany danych społeczności",
   "settings_network_mirror_desc": "Pobieraj ustawienia i czasy okrążeń społeczności przez serwer lustrzany dostępny z Twojej sieci. Pozostaw puste, aby użyć wbudowanego hosta. Zmienna środowiskowa COMMUNITY_TUNES_URL ma pierwszeństwo przed tym ustawieniem.",

@@ -21,6 +21,13 @@ export function youtubeWatchUrl(embedSrc: string): string {
   return embedSrc;
 }
 
+/**
+ * How long a clicked embed gets to connect before anything is claimed about it.
+ * A slow-but-working embed proves itself inside this window; only a miss past it
+ * counts as "did not load".
+ */
+export const VIDEO_LOAD_DEADLINE_MS = 8000;
+
 export type VideoFallbackState = {
   /** The user asked for the embed. */
   activated: boolean;
@@ -28,10 +35,21 @@ export type VideoFallbackState = {
   loaded: boolean;
   /** The load deadline elapsed without a load event. */
   timedOut: boolean;
-  /** Online sources are known to be unreachable from this network. */
-  offline: boolean;
 };
 
+/**
+ * Only the deadline may claim failure: reachability of the other online sources
+ * says nothing about a video, so it is not an input here.
+ */
 export function shouldShowVideoFallback(state: VideoFallbackState): boolean {
-  return state.activated && !state.loaded && (state.offline || state.timedOut);
+  return state.activated && !state.loaded && state.timedOut;
+}
+
+/**
+ * The state a retry replaces: the failed attempt's outcome is cleared, so the
+ * bar hides and the deadline starts over. Callers also remount the iframe,
+ * because reusing the same element can keep the dead connection.
+ */
+export function restartVideoAttempt(): Pick<VideoFallbackState, "loaded" | "timedOut"> {
+  return { loaded: false, timedOut: false };
 }
