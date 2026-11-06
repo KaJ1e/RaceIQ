@@ -37,6 +37,9 @@ interface AccCar {
   class: string;
 }
 
+/** YouTube metadata is decorative: bound the request rather than block on it. */
+const YT_META_CLIENT_TIMEOUT_MS = 8_000;
+
 function extractYouTubeId(url: string): string | null {
   try {
     const u = new URL(url);
@@ -135,15 +138,24 @@ export function AccTrackSetups({ trackId }: { trackId: string }) {
       const cacheKey = `yt-meta:${ytVideoId}`;
       const cached = localStorage.getItem(cacheKey);
       if (cached) return JSON.parse(cached) as { uploadDate: string; downloadUrl: string };
-      const res = await fetch(`/api/acc/yt-meta?videoId=${ytVideoId}`);
+      // The server caps its own YouTube lookup at 5 s; this deadline covers the
+      // same-origin hop so a stalled route can never hold the panel open.
+      const res = await fetch(`/api/acc/yt-meta?videoId=${ytVideoId}`, {
+        signal: AbortSignal.timeout(YT_META_CLIENT_TIMEOUT_MS),
+      });
       if (!res.ok) return null;
       const data = (await res.json()) as { uploadDate: string; downloadUrl: string };
-      localStorage.setItem(cacheKey, JSON.stringify(data));
+      // Only remember metadata that actually resolved: an empty reply means
+      // YouTube was unreachable, and pinning that in localStorage would hide the
+      // link forever once the network recovers.
+      if (data.uploadDate || data.downloadUrl) localStorage.setItem(cacheKey, JSON.stringify(data));
       return data;
     },
     enabled: !!ytVideoId,
     staleTime: Infinity,
     gcTime: Infinity,
+    // Best-effort metadata for one row: retrying only re-pays the deadline.
+    retry: false,
   });
 
   // Merge YouTube metadata into the selected setup

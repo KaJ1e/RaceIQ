@@ -111,6 +111,9 @@ async function fetchManifest(): Promise<LaptimeManifest | null> {
   });
   if (!manifestRes.ok) {
     console.warn(`[Laptimes] manifest fetch failed: HTTP ${manifestRes.status}`);
+    // A captive portal or a filtered mirror answers with an error instead of
+    // timing out; record it so the UI still reports online content unavailable.
+    recordOnlineFailure("laptimes", `manifest HTTP ${manifestRes.status}`);
     return null;
   }
   return ManifestSchema.parse(await manifestRes.json());
@@ -124,6 +127,7 @@ async function fetchGamePayload(
   const res = await fetch(laptimesUrl, { signal: AbortSignal.timeout(10_000) });
   if (!res.ok) {
     console.warn(`[Laptimes] ${manifestKey} fetch failed: HTTP ${res.status}; keeping cache`);
+    recordOnlineFailure("laptimes", `${manifestKey} HTTP ${res.status}`);
     return null;
   }
   return { value: await res.json() };

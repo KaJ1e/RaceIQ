@@ -140,10 +140,44 @@ function findDownloadLink(description: string): string {
   return "";
 }
 
+/** YouTube is blackholed on mainland networks and answers nothing on connect, so
+ *  every page read needs its own deadline and the result must be cached. */
+const YT_META_TIMEOUT_MS = 5_000;
+const YT_META_TTL_MS = 24 * 60 * 60 * 1000;
+/** A blocked host is remembered briefly, so re-selecting a row does not re-pay
+ *  the deadline on every click. */
+const YT_META_FAILURE_TTL_MS = 10 * 60 * 1000;
+const YT_META_CACHE_LIMIT = 200;
+
+const EMPTY_YT_META: YtMeta = { uploadDate: "", downloadUrl: "", cachedAt: "" };
+
+const ytMetaCache = new Map<string, { value: YtMeta; expiresAt: number }>();
+const ytMetaInFlight = new Map<string, Promise<YtMeta>>();
+
+function readYtMetaCache(videoId: string): YtMeta | null {
+  const hit = ytMetaCache.get(videoId);
+  if (!hit) return null;
+  if (hit.expiresAt <= Date.now()) {
+    ytMetaCache.delete(videoId);
+    return null;
+  }
+  return hit.value;
+}
+
+function writeYtMetaCache(videoId: string, value: YtMeta, ttlMs: number): void {
+  if (ytMetaCache.size >= YT_META_CACHE_LIMIT && !ytMetaCache.has(videoId)) {
+    const oldest = ytMetaCache.keys().next().value;
+    if (oldest !== undefined) ytMetaCache.delete(oldest);
+  }
+  ytMetaCache.set(videoId, { value, expiresAt: Date.now() + ttlMs });
+}
+
 async function fetchYtMeta(videoId: string): Promise<YtMeta> {
   const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
     headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" },
+    signal: AbortSignal.timeout(YT_META_TIMEOUT_MS),
   });
+  if (!res.ok) throw new Error(`YouTube returned HTTP ${res.status}`);
   const html = await res.text();
 
   const dateM = html.match(/"uploadDate":"([^"]+)"/);
@@ -169,6 +203,39 @@ async function fetchYtMeta(videoId: string): Promise<YtMeta> {
   return { uploadDate, downloadUrl, cachedAt: new Date().toISOString() };
 }
 
+/**
+ * Cached, de-duplicated, deadline-bounded metadata lookup. It never rejects: when
+ * YouTube cannot be reached the setup row renders with its own data instead of
+ * waiting on a request that never settles.
+ */
+async function lookupYtMeta(videoId: string): Promise<YtMeta> {
+  const cached = readYtMetaCache(videoId);
+  if (cached) return cached;
+
+  const pending = ytMetaInFlight.get(videoId);
+  if (pending) return pending;
+
+  const request = fetchYtMeta(videoId)
+    .then((meta) => {
+      writeYtMetaCache(videoId, meta, YT_META_TTL_MS);
+      return meta;
+    })
+    .catch((error: unknown) => {
+      writeYtMetaCache(videoId, EMPTY_YT_META, YT_META_FAILURE_TTL_MS);
+      console.warn(
+        `[acc] YouTube metadata unavailable for ${videoId}:`,
+        error instanceof Error ? error.message : error,
+      );
+      return EMPTY_YT_META;
+    })
+    .finally(() => {
+      ytMetaInFlight.delete(videoId);
+    });
+
+  ytMetaInFlight.set(videoId, request);
+  return request;
+}
+
 export const accRoutes = new Hono()
 
   // ── Sources ──────────────────────────────────────────────────────────────
@@ -184,11 +251,9 @@ export const accRoutes = new Hono()
     async (c) => {
       const { videoId } = c.req.valid("query");
       if (!/^[\w-]{11}$/.test(videoId)) return c.json({ error: "Invalid video ID" }, 400);
-      try {
-        return c.json(await fetchYtMeta(videoId));
-      } catch (err: any) {
-        return c.json({ error: err.message }, 502);
-      }
+      // A blocked YouTube yields an empty payload, never a hang: the panel keeps
+      // its own setup data and simply has no video description to add.
+      return c.json(await lookupYtMeta(videoId));
     }
   )
 

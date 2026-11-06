@@ -109,6 +109,9 @@ async function fetchManifest(): Promise<Manifest | null> {
     console.warn(
       `[CommunityTunes] manifest fetch failed: HTTP ${manifestRes.status}`,
     );
+    // A captive portal or a filtered mirror answers with an error instead of
+    // timing out; record it so the UI still reports online content unavailable.
+    recordOnlineFailure("tunes", `manifest HTTP ${manifestRes.status}`);
     return null;
   }
   return ManifestSchema.parse(await manifestRes.json());
@@ -124,6 +127,7 @@ async function fetchCommunityTuneRows(
     console.warn(
       `[CommunityTunes] tunes fetch failed for ${gameId}: HTTP ${tunesRes.status}; keeping cache`,
     );
+    recordOnlineFailure("tunes", `${gameId} HTTP ${tunesRes.status}`);
     return null;
   }
 
