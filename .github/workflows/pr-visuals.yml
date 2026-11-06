@@ -47,9 +47,7 @@ jobs:
     needs:
       - responsive
       - storybook
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
-      - mars-retry-3
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2

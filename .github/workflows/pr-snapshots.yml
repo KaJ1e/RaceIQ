@@ -42,9 +42,7 @@ jobs:
   render:
     name: Render
     timeout-minutes: 30
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
-      - mars-retry-3
+    runs-on: ubuntu-latest
     env:
       PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr }}
     steps:
