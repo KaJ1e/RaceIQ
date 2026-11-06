@@ -52,3 +52,10 @@ Publisher maintainers own source collection, conversion, validation, and deploym
 See `server/tunes/community-sync.ts`, `server/db/community-tune-queries.ts`, and
 `apps/backend/test/setups/tuning/community-tunes-sync.test.ts` for current implementation
 details.
+
+The base-URL precedence described above is locked by regression tests:
+`apps/backend/test/runtime/community-mirror-url.test.ts` asserts that
+`COMMUNITY_TUNES_URL` beats `settings.communityTunesUrl` (and that the setting is used
+when the variable is absent) in both tune and lap-time sync, while
+`apps/backend/test/runtime/settings.test.ts` covers saving, normalizing, rejecting, and
+clearing the mirror through `PUT /api/settings`.
