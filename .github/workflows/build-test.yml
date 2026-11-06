@@ -22,7 +22,9 @@ jobs:
   build:
     timeout-minutes: 30
     if: (github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')))
-    runs-on: ubuntu-latest
+    runs-on:
+      - mars-ubuntu-2vcpu-6g
+      - mars-retry-3
     steps:
       - uses: actions/checkout@v7
         with:
@@ -58,7 +60,9 @@ jobs:
   test:
     timeout-minutes: 30
     if: (github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')))
-    runs-on: ubuntu-latest
+    runs-on:
+      - mars-ubuntu-2vcpu-6g
+      - mars-retry-3
     env:
       BUN_TEST_WORKERS: "1"
       TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && github.event.before || 'origin/main') }}
