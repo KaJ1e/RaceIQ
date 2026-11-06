@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { shouldShowVideoFallback, youtubeWatchUrl } from "@raceiq/frontend-pure/video-embed";
-import { useOnlineHealth } from "@/hooks/network-health";
+import {
+  VIDEO_LOAD_DEADLINE_MS,
+  restartVideoAttempt,
+  shouldShowVideoFallback,
+  youtubeWatchUrl,
+} from "@raceiq/frontend-pure/video-embed";
 import { m } from "@/paraglide/messages";
-
-/** A clicked embed that stays blank for this long is treated as blocked. */
-const LOAD_DEADLINE_MS = 6000;
 
 /**
  * YouTube embeds are blocked or reset on mainland networks, and an <iframe> that
@@ -12,29 +13,47 @@ const LOAD_DEADLINE_MS = 6000;
  * play control first and only create the iframe when the user asks for it.
  *
  * The caller owns the media box (give it a size and `relative` or `absolute`);
- * this component fills it. When the embed stays blank — because the network is
- * known to be blocked or the load deadline passed — say so and offer a link that
+ * this component fills it. A click always gets a full load window, and only an
+ * embed still blank after it says so: the bar then offers a retry and a link that
  * opens the video outside the app instead of leaving a black rectangle.
  */
 export function LazyYouTube({ src, title, className }: { src: string; title: string; className?: string }) {
   const [active, setActive] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const health = useOnlineHealth();
-  const offline = health?.known === true && !health.reachable;
+  // Bumped on every attempt and on a new src so the iframe remounts; reusing the
+  // same element after a blocked load may keep the dead connection.
+  const [attempt, setAttempt] = useState(0);
+
+  // A different video is a different attempt: the previous outcome must not hide
+  // this embed's bar, and the deadline has to start from zero.
+  useEffect(() => {
+    setActive(false);
+    setLoaded(false);
+    setTimedOut(false);
+    setAttempt((value) => value + 1);
+  }, [src]);
 
   useEffect(() => {
-    if (!active || loaded) return;
-    const timer = setTimeout(() => setTimedOut(true), LOAD_DEADLINE_MS);
+    if (!active || loaded || timedOut) return;
+    const timer = setTimeout(() => setTimedOut(true), VIDEO_LOAD_DEADLINE_MS);
     return () => clearTimeout(timer);
-  }, [active, loaded]);
+  }, [active, loaded, timedOut, attempt]);
 
-  const showFallback = shouldShowVideoFallback({ activated: active, loaded, timedOut, offline });
+  const showFallback = shouldShowVideoFallback({ activated: active, loaded, timedOut });
+
+  function retry() {
+    const fresh = restartVideoAttempt();
+    setLoaded(fresh.loaded);
+    setTimedOut(fresh.timedOut);
+    setAttempt((value) => value + 1);
+  }
 
   return (
     <div className={className}>
       {active ? (
         <iframe
+          key={attempt}
           src={src}
           title={title}
           className="h-full w-full border-0"
@@ -64,6 +83,15 @@ export function LazyYouTube({ src, title, className }: { src: string; title: str
           className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-x-2 gap-y-1 bg-black/85 px-2 py-1.5 text-app-micro text-white"
         >
           <span className="min-w-0 flex-1">{m.video_embed_unavailable()}</span>
+          <button
+            type="button"
+            onClick={retry}
+            title={m.label_retry()}
+            aria-label={m.label_retry()}
+            className="shrink-0 font-medium underline underline-offset-2"
+          >
+            {m.label_retry()}
+          </button>
           <a
             href={youtubeWatchUrl(src)}
             target="_blank"

@@ -194,6 +194,24 @@ describe("community tunes mirror through PUT /api/settings", () => {
     expect(loadSettings().communityTunesUrl).toBe("https://mirror.example.com/tunes");
   });
 
+  test("accepts an uppercase scheme and stores it exactly as sent", async () => {
+    const response = await putSettings({ communityTunesUrl: "HTTPS://Mirror.Example.com" });
+    expect(response.status).toBe(200);
+    const body = await response.json() as { communityTunesUrl?: string };
+    expect(body.communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+    expect(storedSettings().communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+    expect(loadSettings().communityTunesUrl).toBe("HTTPS://Mirror.Example.com");
+  });
+
+  test("rejects a mirror that only looks like a URL before normalisation", async () => {
+    saveSettings({ ...loadSettings(), communityTunesUrl: "https://kept.example.com/tunes" });
+    const before = readFileSync(SETTINGS_PATH, "utf-8");
+    const response = await putSettings({ communityTunesUrl: "https://///" });
+    expect(response.status).toBe(400);
+    expect(readFileSync(SETTINGS_PATH, "utf-8")).toBe(before);
+    expect(loadSettings().communityTunesUrl).toBe("https://kept.example.com/tunes");
+  });
+
   test("rejects a non-http mirror without touching the stored override", async () => {
     saveSettings({ ...loadSettings(), communityTunesUrl: "https://kept.example.com/tunes" });
     const before = readFileSync(SETTINGS_PATH, "utf-8");

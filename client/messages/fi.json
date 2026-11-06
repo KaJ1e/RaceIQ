@@ -2973,7 +2973,7 @@
   "network_unavailable_banner": "Verkkosisältö ei ole saatavilla — näytetään paikalliset tiedot.",
   "ai_error_network": "AI-palveluntarjoajaan ei saada yhteyttä. Tarkista verkko tai välityspalvelin ja yritä uudelleen.",
   "ai_error_timeout": "AI-palveluntarjoaja vastasi liian hitaasti. Yritä uudelleen.",
-  "video_embed_unavailable": "Videota ei ladattu. YouTube voi olla estetty tässä verkossa.",
+  "video_embed_unavailable": "Videota ei ladattu. Verkko voi olla huono tai YouTube ei ole saatavilla alueellasi.",
   "video_embed_open": "Avaa YouTubessa",
   "settings_network_mirror_title": "Yhteisödatan peilipalvelin",
   "settings_network_mirror_desc": "Lataa yhteisön säätöjä ja kierrosaikoja peilipalvelimen kautta, joka on tavoitettavissa verkostasi. Jätä tyhjäksi, jos haluat käyttää sisäänrakennettua palvelinta. Ympäristömuuttuja COMMUNITY_TUNES_URL ohittaa tämän asetuksen.",

@@ -2972,7 +2972,7 @@
   "network_unavailable_banner": "Contenu en ligne indisponible — données locales affichées.",
   "ai_error_network": "Impossible de joindre le fournisseur d'IA. Vérifiez votre réseau ou le proxy, puis réessayez.",
   "ai_error_timeout": "Le fournisseur d'IA a mis trop de temps à répondre. Réessayez.",
-  "video_embed_unavailable": "La vidéo n'a pas été chargée. YouTube peut être bloqué sur ce réseau.",
+  "video_embed_unavailable": "La vidéo n'a pas été chargée. Le réseau est peut-être mauvais ou YouTube indisponible dans votre région.",
   "video_embed_open": "Ouvrir sur YouTube",
   "settings_network_mirror_title": "Miroir des données communautaires",
   "settings_network_mirror_desc": "Téléchargez les réglages et les temps au tour de la communauté via un miroir accessible depuis votre réseau. Laissez vide pour utiliser l'hôte intégré. La variable d'environnement COMMUNITY_TUNES_URL est prioritaire sur ce réglage.",

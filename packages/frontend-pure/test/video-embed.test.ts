@@ -1,5 +1,10 @@
 import { describe, test, expect } from "bun:test";
-import { shouldShowVideoFallback, youtubeWatchUrl } from "@raceiq/frontend-pure/video-embed";
+import {
+  VIDEO_LOAD_DEADLINE_MS,
+  restartVideoAttempt,
+  shouldShowVideoFallback,
+  youtubeWatchUrl,
+} from "@raceiq/frontend-pure/video-embed";
 
 describe("youtubeWatchUrl", () => {
   test("turns an embed URL into its watch URL", () => {
@@ -22,21 +27,31 @@ describe("youtubeWatchUrl", () => {
 });
 
 describe("shouldShowVideoFallback", () => {
-  const idle = { activated: false, loaded: false, timedOut: false, offline: false };
+  const idle = { activated: false, loaded: false, timedOut: false };
 
   test("stays quiet before the user asks for the video", () => {
-    expect(shouldShowVideoFallback({ ...idle, timedOut: true, offline: true })).toBe(false);
+    expect(shouldShowVideoFallback({ ...idle, timedOut: true })).toBe(false);
+  });
+
+  test("stays quiet while the embed is still loading", () => {
+    expect(shouldShowVideoFallback({ ...idle, activated: true })).toBe(false);
   });
 
   test("stays quiet once the embed loaded", () => {
     expect(shouldShowVideoFallback({ ...idle, activated: true, loaded: true })).toBe(false);
   });
 
-  test("speaks up when the network is known to be blocked", () => {
-    expect(shouldShowVideoFallback({ ...idle, activated: true, offline: true })).toBe(true);
+  test("speaks up only after the deadline passed without a load", () => {
+    expect(shouldShowVideoFallback({ ...idle, activated: true, timedOut: true })).toBe(true);
   });
 
-  test("speaks up when the embed never loads", () => {
-    expect(shouldShowVideoFallback({ ...idle, activated: true, timedOut: true })).toBe(true);
+  test("waits a full 8 s before claiming failure", () => {
+    expect(VIDEO_LOAD_DEADLINE_MS).toBe(8000);
+  });
+
+  test("retrying clears the failure so the deadline runs again", () => {
+    const failed = { ...idle, activated: true, timedOut: true };
+    expect(shouldShowVideoFallback(failed)).toBe(true);
+    expect(shouldShowVideoFallback({ ...failed, ...restartVideoAttempt() })).toBe(false);
   });
 });
