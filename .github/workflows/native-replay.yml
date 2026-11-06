@@ -25,8 +25,7 @@ concurrency:
 jobs:
   replay:
     timeout-minutes: 30
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:

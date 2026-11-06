@@ -27,9 +27,7 @@ jobs:
       github.event.workflow_run.event == 'workflow_dispatch' ||
       github.event.workflow_run.event == 'pull_request' ||
       github.event.workflow_run.event == 'workflow_call'
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
-      - mars-retry-3
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write

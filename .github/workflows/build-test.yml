@@ -22,9 +22,7 @@ jobs:
   build:
     timeout-minutes: 30
     if: (github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')))
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
-      - mars-retry-3
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
@@ -60,9 +58,7 @@ jobs:
   test:
     timeout-minutes: 30
     if: (github.event_name != 'pull_request' || (!github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')))
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
-      - mars-retry-3
+    runs-on: ubuntu-latest
     env:
       BUN_TEST_WORKERS: "1"
       TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000' && github.event.before || 'origin/main') }}
@@ -162,7 +158,9 @@ jobs:
   # Playwright runners span architectures; build the compiled server on each runner
   # instead of sharing a dist artifact built for an arbitrary build-runner architecture.
   playwright-e2e:
-    if: github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')
+    # Visual/WebGPU gates are owned by the upstream project and need its
+    # dedicated runners. Keep fork PR checks on the portable build/test jobs.
+    if: github.repository == 'SpeedHQ/RaceIQ' && github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')
     needs:
       - build
       - test
@@ -173,7 +171,7 @@ jobs:
 
   visual-regression:
     name: visual-regression/compare
-    if: github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')
+    if: github.repository == 'SpeedHQ/RaceIQ' && github.event_name == 'pull_request' && !github.event.pull_request.draft && !startsWith(github.head_ref, 'release/v')
     needs:
       - build
       - test

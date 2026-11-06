@@ -15,8 +15,7 @@ concurrency:
 jobs:
   update-readme:
     timeout-minutes: 30
-    runs-on:
-      - mars-ubuntu-2vcpu-6g
+    runs-on: ubuntu-latest
     permissions:
       contents: write
 
