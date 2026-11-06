@@ -8,6 +8,8 @@
 - Open lap analysis and lap comparisons faster after a long session: a player lap now loads from its own published capture chunk instead of streaming the whole session capture from the first byte, which cost about 30 seconds per lap on a 5 GB stint.
 - Say why a track-guide video stayed blank and offer to open it on YouTube instead of leaving an empty player.
 - Explain AI provider connection problems in plain language instead of the raw transport error.
+- Stop an update download from hanging forever on a blocked connection: after 15 seconds without progress it reports that the download stalled, and Retry starts it again.
+- Open ACC setups without waiting for YouTube: when the video description cannot be loaded, the setup opens right away without it.
 
 ### Internal
 - Require an explicitly configured model for AI evaluation runs.
