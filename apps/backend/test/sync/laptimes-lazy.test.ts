@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { resetLaptimesStateForTest } from "@raceiq/backend-core/sync/laptimes";
 import { tuneCatalogRoutes } from "../../src/routes/tune-catalog-routes";
 
 const realFetch = globalThis.fetch;
@@ -27,6 +28,12 @@ function stubFetch(body: unknown, onFetch?: () => void) {
 
 afterEach(() => {
   globalThis.fetch = realFetch;
+});
+
+// Test files share one module instance per `bun test` process; start each case
+// from an empty cache regardless of what ran before this file.
+beforeEach(() => {
+  resetLaptimesStateForTest();
 });
 
 describe("lazy community laptimes", () => {

@@ -299,3 +299,22 @@ export async function ensureLaptimesReady(): Promise<void> {
   }
   await initialSyncPromise;
 }
+
+/**
+ * Test-only seam: return the module to its just-loaded state (empty cache, no
+ * version, no pending refresh) so a test does not inherit rows another test
+ * file synced. Every test file in a `bun test` invocation shares one module
+ * instance, so without this a later file sees an already-populated cache and
+ * the offline seed fallback never runs. Production code never calls it.
+ */
+export function resetLaptimesStateForTest(): void {
+  cache.clear();
+  cachedVersion = null;
+  syncInProgress = false;
+  laptimesReady = false;
+  initialSyncPromise = null;
+  if (refreshTimer) {
+    clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}

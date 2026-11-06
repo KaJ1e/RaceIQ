@@ -1,9 +1,13 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
-import { getLaptimes, syncLaptimes } from "@raceiq/backend-core/sync/laptimes";
+import {
+  getLaptimes,
+  resetLaptimesStateForTest,
+  syncLaptimes,
+} from "@raceiq/backend-core/sync/laptimes";
 
 /**
  * Pins the bundled offline snapshots.
@@ -106,6 +110,13 @@ function readSnapshot(pin: SnapshotPin) {
 
 afterEach(() => {
   globalThis.fetch = realFetch;
+});
+
+// Every test file in one `bun test` invocation shares a single module instance.
+// Reset the leaderboard cache so rows another file synced cannot hide the seed
+// path, and so this file leaves no synced rows behind either.
+beforeEach(() => {
+  resetLaptimesStateForTest();
 });
 
 describe("bundled seed snapshots", () => {
